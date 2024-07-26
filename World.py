@@ -38,6 +38,9 @@ class World(object):
         self.wood = 0
         self.fish = 0
 
+        # Time
+        self.time = 0.0
+
         # Entities
         self.entities = {}
         self.buildings = {}
@@ -254,7 +257,7 @@ class World(object):
         Returns:
             None
         """
-
+        self.time += delta
         for entity in self.entities.values():
             entity.process(delta)
 

@@ -90,7 +90,7 @@ def run(fullscreen, world_size=64):
 
         # Update the screen
         pygame.display.update()
-        print(time_passed_seconds) 
+        print(game_world.time) 
 
     pygame.quit()
 
