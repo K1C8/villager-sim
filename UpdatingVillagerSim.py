@@ -10,6 +10,9 @@ import TileFuncs
 import World
 import DebugTools
 
+global DEBUG_MODE
+DEBUG_MODE = True
+
 def run(fullscreen, world_size=64):
     """The main function to run the program.
 
@@ -25,6 +28,11 @@ def run(fullscreen, world_size=64):
     """
 
     pygame.init()
+    
+    # init font
+    pygame.font.init()
+    debug_font = pygame.font.SysFont(None, 24)
+    
     screen_size = (1280, 720)
     if fullscreen:
         screen_size = pygame.display.list_modes()[0]
@@ -88,9 +96,29 @@ def run(fullscreen, world_size=64):
         screen.fill((0, 0, 0))
         game_world.render_all(screen)
 
+        # Apply dark filter to screen when night time
+        if not game_world.is_day:
+            dark_filter = pygame.Surface(screen.get_size())
+            dark_filter.fill((0, 0, 0))
+            dark_filter.set_alpha(50) # Hardcoded alpha value representing the darkness of night
+            screen.blit(dark_filter, (0, 0))
+
+        if DEBUG_MODE:
+        # print day string to top left corner of the screen
+            debug_day_string =         "Day: " + str(game_world.day)
+            debug_day_status_string =  "Status: " + ("Day" if game_world.is_day else "Night")
+            debug_day_time_string =    "Time: " + str(int(game_world.time))
+            
+            day_string_surface = debug_font.render(debug_day_string, True, (255, 255, 255)) 
+            day_status_surface = debug_font.render(debug_day_status_string, True, (255, 255, 255))
+            day_time_surface = debug_font.render(debug_day_time_string, True, (255, 255, 255))
+            
+            screen.blit(day_string_surface, (10, 10))
+            screen.blit(day_status_surface, (10, 40))
+            screen.blit(day_time_surface, (10, 70))  
+        
         # Update the screen
         pygame.display.update()
-        print(game_world.time) 
 
     pygame.quit()
 

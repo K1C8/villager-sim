@@ -39,8 +39,14 @@ class World(object):
         self.fish = 0
 
         # Time
+        self.day = 0
         self.time = 0.0
 
+        self.is_day = True
+        self.DAYTIME_DURATION = 5.0
+        self.NIGHTTIME_DURATION = 3.0
+        self.DAY_DURATION = self.DAYTIME_DURATION + self.NIGHTTIME_DURATION
+        
         # Entities
         self.entities = {}
         self.buildings = {}
@@ -257,7 +263,16 @@ class World(object):
         Returns:
             None
         """
+        
+        # time increment and day/night cycle
         self.time += delta
+        if self.is_day and self.time > self.DAYTIME_DURATION: 
+            self.is_day = False
+        elif not self.is_day and self.time > self.DAY_DURATION:
+            self.time = self.time - self.DAY_DURATION
+            self.is_day = True
+            self.day += 1
+        
         for entity in self.entities.values():
             entity.process(delta)
 
