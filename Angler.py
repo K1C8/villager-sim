@@ -66,17 +66,19 @@ class Fishing(State):
             self.angler.destination = Vector2(self.angler.location)
             self.angler.update()
 
-        if self.angler.fish == 1:
+        if self.angler.fish >= 1:
             return "Delivering"
 
     def do_actions(self):
         if self.angler.location == self.angler.destination and self.angler.hit >= 4:
             # TODO: Why is this checking if the tile is fishable if it has been fishing there?
             
-            for tile_location in TileFuncs.get_vnn_array(self.angler.world, self.angler.location, 2):
-                if TileFuncs.get_tile(self.angler.world, tile_location).fishable:
-                    self.angler.hit = 0
-                    self.angler.fish = 1
+            # for tile_location in TileFuncs.get_vnn_array(self.angler.world, self.angler.location, 2):
+            #     if TileFuncs.get_tile(self.angler.world, tile_location).fishable:
+            #         self.angler.hit = 0
+            #         self.angler.fish = 1
+            self.angler.fish = 5
+            self.angler.hit = 0
 
     def entry_actions(self):
         BaseFunctions.random_dest(self.angler)
@@ -101,10 +103,13 @@ class Searching(State):
             for location in location_array:
                 # TODO: This will make the angler go into the water, change this to go to the nearest walkable tile.
                 test_tile = TileFuncs.get_tile(self.angler.world, location)
-                if test_tile.__class__.__name__ == "WaterTile":
-
-                    self.angler.destination = location.copy()
-                    return "Fishing"
+                if test_tile.fishable:
+                    destination_array = TileFuncs.get_vnn_array(world=self.angler.world, location=location, r=2)
+                    for destination in destination_array:
+                        destination_tile = TileFuncs.get_tile(self.angler.world, destination)
+                        if destination_tile.walkable:
+                            self.angler.destination = destination.copy()
+                            return "Fishing"
 
             BaseFunctions.random_dest(self.angler)
 
@@ -118,7 +123,7 @@ class Delivering(State):
         self.angler = angler
 
     def entry_actions(self):
-        #TODO: Make dropoff point dynamic (e.g. it's own building)
+        # TODO: Make dropoff point dynamic (e.g. its own building)
 
         self.angler.destination = Vector2(self.angler.world.w/2, self.angler.world.h/2)
 

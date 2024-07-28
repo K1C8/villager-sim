@@ -115,12 +115,14 @@ def run(fullscreen, world_size=64):
             day_status_surface = debug_font.render(debug_day_status_string, True, (255, 255, 255))
             day_time_surface = debug_font.render(debug_day_time_string, True, (255, 255, 255))
             res_wood_surface = debug_font.render(debug_res_wood_string, True, (255, 255, 255))
-            
+            res_fish_surface = debug_font.render(debug_res_fish_string, True, (255, 255, 255))
+
             screen.blit(day_string_surface, (10, 10))
             screen.blit(day_status_surface, (10, 40))
             screen.blit(day_time_surface, (10, 70))  
             screen.blit(res_wood_surface, (10, 100))
-        
+            screen.blit(res_fish_surface, (10, 130))
+
         # Update the screen
         pygame.display.update()
 

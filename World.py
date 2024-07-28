@@ -37,6 +37,7 @@ class World(object):
         # Unused variables
         self.wood = 0
         self.fish = 0
+        self.crop = 0
 
         # Time
         self.day = 0
