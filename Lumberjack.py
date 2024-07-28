@@ -155,7 +155,8 @@ class Delivering(State):
         self.lumberjack = Lumberjack
 
     def entry_actions(self):
-        self.lumberjack.destination = Vector2(self.lumberjack.world.w/2,self.lumberjack.world.h/2)
+        # self.lumberjack.destination = Vector2(self.lumberjack.world.w/2,self.lumberjack.world.h/2)
+        self.lumberjack.destination = self.lumberjack.world.lumber_yard[0]
 
     def do_actions(self):
         pass

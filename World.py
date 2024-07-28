@@ -243,7 +243,7 @@ class World(object):
                 # new_building initial function call
                 # self.add_building()
                 # temporary codes
-                if key.equals("Lumber_Yard"):
+                if key == "Lumber_Yard":
                     location = vector2.Vector2(self.w / 2, self.h / 2)
                     self.lumber_yard[0] = location
 
@@ -363,6 +363,13 @@ class World(object):
             pygame.draw.rect(surface, (r, g, b),
                              pygame.Rect((entity.world_location.x + 20, entity.world_location.y - 14 + (i * 7)),
                                          (int(40 * t), 4)))
+
+        # if DEBUG_MODE:
+        debug_font = pygame.font.SysFont(None, 16)
+        debug_ent_active_state_string = "State: " + str(entity.brain.active_state.name)
+        ent_active_state_surface = debug_font.render(debug_ent_active_state_string, True, (255, 255, 255))
+        surface.blit(ent_active_state_surface, (entity.world_location.x + 10, entity.world_location.y + 15))
+
 
     def lerp(self, v1, v2, t):
         return (1 - t) * v2 + t * v1
