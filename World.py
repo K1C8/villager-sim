@@ -52,6 +52,9 @@ class World(object):
         self.buildings = {}
         self.entity_id = 0
         self.building_id = 0
+        
+        self.lumber_yard = {}
+        self.barn = {}
 
         self.new_world(tile_dimensions)
         self.clipper = Clips.Clips(self, screen_size)
@@ -221,6 +224,12 @@ class World(object):
                               "state": "Exploring",
                               "class": Explorer.Explorer}
                  }
+                
+        start_buildings = {"Barn": {"count": 0
+                                    },
+                           "Lumber_Yard": {"count": 1
+                                           }
+                          }
 
         for key in start.keys():
             for count in range(start[key]["count"]):
@@ -228,6 +237,15 @@ class World(object):
                 new_ent.location = vector2.Vector2(self.w / 2, self.h / 2)
                 new_ent.brain.set_state(start[key]["state"])
                 self.add_entity(new_ent)
+                
+        for key in start_buildings.keys():
+            for count in range(start_buildings[key]["count"]):
+                # new_building initial function call
+                # self.add_building()
+                # temporary codes
+                if key.equals("Lumber_Yard"):
+                    location = vector2.Vector2(self.w / 2, self.h / 2)
+                    self.lumber_yard[0] = location
 
     def add_entity(self, entity):
         """Maps the input entity to the entity hash table (dictionary)
