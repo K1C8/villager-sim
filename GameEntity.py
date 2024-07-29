@@ -42,6 +42,16 @@ class GameEntity(object):
 
         self.tp = 1.0
 
+        # TODO (wazzup771@gmail.com | Nick Wayne): Not sure if these belong in the World class either
+        self.info_bar = pygame.image.load("Images/Entities/info_bar.png").convert()
+        self.info_bar.set_colorkey((255, 0, 255))
+        self.f_high = (50, 200, 50)
+        self.f_low = (255, 0, 0)
+        self.w_high = (0, 0, 255)
+        self.w_low = (76, 70, 50)
+        self.e_high = (0, 255, 0)
+        self.e_low = (50, 50, 0)
+
     def render(self, surface):
         x, y = self.world_location
         w, h = self.image.get_size()
@@ -53,6 +63,30 @@ class GameEntity(object):
             self.speed = 0.5 * self.base_speed
         else:
             self.speed = self.base_speed
+
+    # TODO(wazzup771@gmail.com | Nick Wayne): This function doesn't belong in the world class, perhaps the GameEntity
+    #  class.
+    def render_info_bar(self, surface, entity):
+        lst = [self.f_high, self.f_low, self.w_high, self.w_low, self.e_high, self.e_low]
+        lst2 = [entity.food, entity.water, entity.energy]
+        surface.blit(self.info_bar, (entity.world_location.x + 10, entity.world_location.y - 20))
+        for i in range(3):
+            t = lst2[i] / 100.
+            r = self.lerp(lst[2 * i][0], lst[2 * i + 1][0], t)
+            g = self.lerp(lst[2 * i][1], lst[2 * i + 1][1], t)
+            b = self.lerp(lst[2 * i][2], lst[2 * i + 1][2], t)
+            pygame.draw.rect(surface, (r, g, b),
+                             pygame.Rect((entity.world_location.x + 20, entity.world_location.y - 14 + (i * 7)),
+                                         (int(40 * t), 4)))
+
+        # if DEBUG_MODE:
+        debug_font = pygame.font.SysFont(None, 16)
+        debug_ent_active_state_string = "State: " + str(entity.brain.active_state.name)
+        ent_active_state_surface = debug_font.render(debug_ent_active_state_string, True, (255, 255, 255))
+        surface.blit(ent_active_state_surface, (entity.world_location.x + 10, entity.world_location.y + 15))
+
+    def lerp(self, v1, v2, t):
+        return (1 - t) * v2 + t * v1
 
     def process(self, time_passed):
         self.brain.think()

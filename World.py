@@ -10,6 +10,7 @@ import Angler
 import Explorer
 import Arborist
 
+
 class World(object):
     """This class holds everything in the game. It also
     updates and renders it all each frame."""
@@ -44,8 +45,8 @@ class World(object):
         self.time = 0.0
 
         self.is_day = True
-        self.DAYTIME_DURATION = 5.0
-        self.NIGHTTIME_DURATION = 3.0
+        self.DAYTIME_DURATION = 38.0
+        self.NIGHTTIME_DURATION = 22.0
         self.DAY_DURATION = self.DAYTIME_DURATION + self.NIGHTTIME_DURATION
         
         # Entities
@@ -59,16 +60,6 @@ class World(object):
 
         self.new_world(tile_dimensions)
         self.clipper = Clips.Clips(self, screen_size)
-
-        # TODO (wazzup771@gmail.com | Nick Wayne): Not sure if these belong here either
-        self.info_bar = pygame.image.load("Images/Entities/info_bar.png").convert()
-        self.info_bar.set_colorkey((255, 0, 255))
-        self.f_high = (50, 200, 50)
-        self.f_low = (255, 0, 0)
-        self.w_high = (0, 0, 255)
-        self.w_low = (76, 70, 50)
-        self.e_high = (0, 255, 0)
-        self.e_low = (50, 50, 0)
 
     def new_world(self, array_size):
         """Creates a new world (including all of the entities)
@@ -310,7 +301,7 @@ class World(object):
         for entity in self.entities.values():
             entity.render(surface)
             if entity.active_info:
-                self.render_info_bar(surface,entity)
+                entity.render_info_bar(surface, entity)
 
     def render_all(self, surface):
         """Calls the clipper's render function, which also calls
@@ -350,27 +341,3 @@ class World(object):
             y_temp_1 = -self.clipper.b * (mouse_pos.y - self.clipper.minimap_rect.y)
             y_temp_2 = self.clipper.rect_view_h * self.clipper.b
             self.world_position.y = y_temp_1 + (y_temp_2 / 2)
-
-    # TODO(wazzup771@gmail.com | Nick Wayne): This function doesn't belong in this class, perhaps the entity superclass.
-    def render_info_bar(self, surface, entity):
-        lst = [self.f_high, self.f_low, self.w_high, self.w_low, self.e_high, self.e_low]
-        lst2 = [entity.food, entity.water, entity.energy]
-        surface.blit(self.info_bar, (entity.world_location.x + 10, entity.world_location.y - 20))
-        for i in range(3):
-            t = lst2[i] / 100.
-            r = self.lerp(lst[2 * i][0], lst[2 * i + 1][0], t)
-            g = self.lerp(lst[2 * i][1], lst[2 * i + 1][1], t)
-            b = self.lerp(lst[2 * i][2], lst[2 * i + 1][2], t)
-            pygame.draw.rect(surface, (r, g, b),
-                             pygame.Rect((entity.world_location.x + 20, entity.world_location.y - 14 + (i * 7)),
-                                         (int(40 * t), 4)))
-
-        # if DEBUG_MODE:
-        debug_font = pygame.font.SysFont(None, 16)
-        debug_ent_active_state_string = "State: " + str(entity.brain.active_state.name)
-        ent_active_state_surface = debug_font.render(debug_ent_active_state_string, True, (255, 255, 255))
-        surface.blit(ent_active_state_surface, (entity.world_location.x + 10, entity.world_location.y + 15))
-
-
-    def lerp(self, v1, v2, t):
-        return (1 - t) * v2 + t * v1

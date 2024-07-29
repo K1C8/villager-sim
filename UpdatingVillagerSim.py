@@ -99,8 +99,8 @@ def run(fullscreen, world_size=64):
         # Apply dark filter to screen when night time
         if not game_world.is_day:
             dark_filter = pygame.Surface(screen.get_size())
-            dark_filter.fill((0, 0, 0))
-            dark_filter.set_alpha(50) # Hardcoded alpha value representing the darkness of night
+            dark_filter.fill((0, 0, 80))
+            dark_filter.set_alpha(96)   # Hardcoded alpha value representing the darkness of night
             screen.blit(dark_filter, (0, 0))
 
         if DEBUG_MODE:

@@ -5,9 +5,6 @@ from gametools.vector2 import Vector2
 from gametools.ImageFuncs import *
 from gametools.ani import *
 import BaseFunctions
-import math
-import pygame
-import random
 import TileFuncs
 from World import *
 #TODO: Clean up imports and add docstrings
@@ -115,6 +112,7 @@ class Searching(State):
 
     def exit_actions(self):
         pass
+
 
 class Delivering(State):
 
