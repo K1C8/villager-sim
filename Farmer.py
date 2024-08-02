@@ -5,6 +5,7 @@
 import aitools.StateMachine
 from Entities import *
 from GameEntity import *
+from common_state.Feeding import Feeding
 from gametools.vector2 import Vector2
 from gametools.ImageFuncs import *
 from gametools.ani import *
@@ -14,6 +15,7 @@ import random
 import TileFuncs
 import BaseFunctions
 
+
 class Farmer(GameEntity):
     """The main class for Farmer. See above for the description"""
 
@@ -21,13 +23,15 @@ class Farmer(GameEntity):
         """Basic initialization"""
 
         # Initializing the class
-        GameEntity.__init__(self, world, "Farmer", "Entities/"+image_string)
+        GameEntity.__init__(self, world, "Farmer", "Entities/"+image_string, consume_func=consume_func_villager)
 
         # Creating the states
         tilling_state = Farmer_Tilling(self)
+        feeding_state = Feeding(self)
 
         # Adding states to the brain
         self.brain.add_state(tilling_state)
+        self.brain.add_state(feeding_state)
 
         self.max_speed = 80.0 * (1.0 / 60.0)
         self.speed = self.max_speed
@@ -35,6 +39,7 @@ class Farmer(GameEntity):
 
         self.worldSize = world.world_size
         self.TileSize = self.world.tile_size
+        self.primary_state = "Tilling"
 
 class Farmer_Tilling(aitools.StateMachine.State):
     

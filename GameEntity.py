@@ -1,3 +1,5 @@
+from builtins import function
+
 from World import *
 from aitools.StateMachine import *
 from gametools.vector2 import *
@@ -9,7 +11,7 @@ from pygame.locals import *
 
 
 class GameEntity(object):
-    def __init__(self, world, name, image_string):
+    def __init__(self, world, name, image_string, consume_func):
 
         self.world = world
         self.name = name
@@ -35,6 +37,8 @@ class GameEntity(object):
         self.water = 70
         self.energy = 70
         self.active_info = False
+        self.consume_func = consume_func
+        self.consume_func()
 
         self.brain = StateMachine()
 
@@ -101,3 +105,7 @@ class GameEntity(object):
             heading = vec_to_destination.get_normalized()
             travel_distance = min(distance_to_destination, self.speed)
             self.location += travel_distance * heading * self.speed
+
+    def death(self):
+        self.world.delete_entity(self)
+

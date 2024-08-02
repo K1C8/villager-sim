@@ -1,6 +1,7 @@
 from aitools.StateMachine import *
 from Entities import *
 from GameEntity import *
+from common_state.Feeding import Feeding
 from gametools.vector2 import Vector2
 from gametools.ImageFuncs import *
 from gametools.ani import *
@@ -13,12 +14,15 @@ from World import *
 import BaseFunctions
 
 NoTreeImg = pygame.image.load("Images/Tiles/MinecraftGrass.png")
+HUNGER_LIMIT = 40
+
 
 class Lumberjack(GameEntity):
 
     def __init__(self, world, image_string):
         # Initializing the class
-        GameEntity.__init__(self, world, "Lumberjack", "Entities/"+image_string)
+        GameEntity.__init__(self, world, "Lumberjack", "Entities/"+image_string,
+                            consume_func=consume_func_villager)
 
         self.speed = 100.0 * (1.0 / 60.0)
         self.base_speed = self.speed
@@ -28,14 +32,17 @@ class Lumberjack(GameEntity):
         self.searching_state = Searching(self)
         self.chopping_state = Chopping(self)
         self.delivering_state = Delivering(self)
+        self.feeding_state = Feeding(self)
 
         # Adding states to the brain
         self.brain.add_state(self.searching_state)
         self.brain.add_state(self.chopping_state)
         self.brain.add_state(self.delivering_state)
+        self.brain.add_state(self.feeding_state)
 
         self.worldSize = world.world_size
         self.TileSize = self.world.tile_size
+        self.primary_state = "Searching"
 
         # animation variables
         self.animation = Ani(5,10)
@@ -87,6 +94,9 @@ class Searching(State):
                     return "Chopping"
 
             BaseFunctions.random_dest(self.lumberjack)
+
+        if self.lumberjack.food < HUNGER_LIMIT:
+            return "Feeding"
 
     def exit_actions(self):
         pass
@@ -171,6 +181,7 @@ class Delivering(State):
             return "Searching"
 
     def exit_actions(self):
+        self.lumberjack.destination = self.lumberjack.world.get_food_court()
         pass
 
 

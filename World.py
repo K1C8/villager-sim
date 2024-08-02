@@ -1,6 +1,9 @@
 import sys
 import pygame
+
+from GameEntity import GameEntity
 from gametools import vector2, VoronoiMapGen, MidpointDisplacement, PertTools
+from async_funcs.entity_consumption import consume_func_villager, consume_func_plant
 import math
 import Tile
 import Clips
@@ -10,6 +13,9 @@ import Angler
 import Explorer
 import Arborist
 
+DAYTIME_DURATION = 38.0
+NIGHTTIME_DURATION = 22.0
+DAY_DURATION = DAYTIME_DURATION + NIGHTTIME_DURATION
 
 class World(object):
     """This class holds everything in the game. It also
@@ -35,19 +41,19 @@ class World(object):
 
         self.clock = pygame.time.Clock()
 
-        # Unused variables
-        self.wood = 0
-        self.fish = 0
-        self.crop = 0
+        # Starting resources of new game
+        self.wood = 100
+        self.fish = 100
+        self.crop = 500
 
         # Time
         self.day = 0
         self.time = 0.0
 
         self.is_day = True
-        self.DAYTIME_DURATION = 38.0
-        self.NIGHTTIME_DURATION = 22.0
-        self.DAY_DURATION = self.DAYTIME_DURATION + self.NIGHTTIME_DURATION
+        # self.DAYTIME_DURATION = 38.0
+        # self.NIGHTTIME_DURATION = 22.0
+        # self.DAY_DURATION = DAYTIME_DURATION + NIGHTTIME_DURATION
         
         # Entities
         self.entities = {}
@@ -238,6 +244,9 @@ class World(object):
                 if key == "Lumber_Yard":
                     location = vector2.Vector2(self.w / 2, self.h / 2)
                     self.lumber_yard[0] = location
+                elif key == "Barn":
+                    location = vector2.Vector2(self.w / 2, self.h / 2)
+                    self.barn[0] = location
 
     def add_entity(self, entity):
         """Maps the input entity to the entity hash table (dictionary)
@@ -276,10 +285,13 @@ class World(object):
         
         # time increment and day/night cycle
         self.time += delta
-        if self.is_day and self.time > self.DAYTIME_DURATION: 
+        # if self.is_day and self.time > self.DAYTIME_DURATION:
+        if self.is_day and self.time > DAYTIME_DURATION:
             self.is_day = False
-        elif not self.is_day and self.time > self.DAY_DURATION:
-            self.time = self.time - self.DAY_DURATION
+        # elif not self.is_day and self.time > self.DAY_DURATION:
+        elif not self.is_day and self.time > DAY_DURATION:
+            # self.time = self.time - self.DAY_DURATION
+            self.time = self.time - DAY_DURATION
             self.is_day = True
             self.day += 1
         
@@ -341,3 +353,19 @@ class World(object):
             y_temp_1 = -self.clipper.b * (mouse_pos.y - self.clipper.minimap_rect.y)
             y_temp_2 = self.clipper.rect_view_h * self.clipper.b
             self.world_position.y = y_temp_1 + (y_temp_2 / 2)
+
+    def get_food_court(self):
+        return self.barn[0]
+
+    def delete_entity(self, entity_to_delete: GameEntity):
+        """
+        This function act as the function to delete entity from the world.
+        Input:
+            entity: The entity that is needed to be deleted, like the result of a death event.
+
+        """
+        for entity in self.entities:
+            if entity == entity_to_delete:
+                self.entities[entity_to_delete.id] = None
+
+        del entity_to_delete

@@ -1,29 +1,33 @@
 from aitools.StateMachine import *
 from Entities import *
 from GameEntity import *
+from common_state.Feeding import Feeding
 from gametools.vector2 import Vector2
 from gametools.ImageFuncs import *
 from gametools.ani import *
 import BaseFunctions
 import TileFuncs
 from World import *
+from async_funcs.entity_consumption import consume_func_villager
 #TODO: Clean up imports and add docstrings
 
 class Angler(GameEntity):
 
     def __init__(self, world, image_string):
         # Initializing the class
-        GameEntity.__init__(self, world, "Angler", "Entities/"+image_string)
+        GameEntity.__init__(self, world, "Angler", "Entities/"+image_string, consume_func_villager)
 
         # Creating the states
         fishing_state = Fishing(self)
         exploring_state = Searching(self)
         delivering_state = Delivering(self)
+        feeding_state = Feeding(self)
 
         # Adding states to the brain
         self.brain.add_state(fishing_state)
         self.brain.add_state(exploring_state)
         self.brain.add_state(delivering_state)
+        self.brain.add_state(feeding_state)
 
         self.max_speed = 80.0 * (1.0 / 60.0)
         self.speed = self.max_speed
@@ -33,6 +37,7 @@ class Angler(GameEntity):
 
         self.worldSize = world.world_size
         self.TileSize = self.world.tile_size
+        self.primary_state = "Searching"
 
         # animation variables
         self.animation = Ani(9, 10)

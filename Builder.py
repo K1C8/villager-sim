@@ -1,6 +1,8 @@
 from aitools.StateMachine import *
 from World import *
 from GameEntity import *
+from async_funcs.entity_consumption import consume_func_villager
+from common_state.Feeding import Feeding
 from gametools.vector2 import Vector2
 
 from Buildings import *
@@ -12,19 +14,22 @@ import pygame
 
 class Builder(GameEntity):
     def __init__(self, world, image, rest):
-        GameEntity.__init__(self, world, "Builder", image)
+        GameEntity.__init__(world=world, name="Builder", image_string=image, consume_func=consume_func_villager)
 
         self.current_build = None
 
         self.speed = 100.0
+        self.primary_state = "Builder_Idle"
 
         self.building_state = Builder_Building(self)
         self.Idle_state = Builder_Idle(self)
         self.Finding_state = Builder_Finding(self)
+        self.feeding_state = Feeding(self)
 
         self.brain.add_state(self.building_state)
         self.brain.add_state(self.Idle_state)
         self.brain.add_state(self.Finding_state)
+        self.brain.add_state(self.feeding_state)
 
         self.IdleLocation = rest.location.copy()
 
