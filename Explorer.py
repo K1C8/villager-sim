@@ -6,9 +6,12 @@ pursure knowledge at other costs.
 Also this class was primarily developed to track down movement bugs."""
 
 import aitools.StateMachine
-
+from async_funcs.entity_consumption import consume_func_villager
 import GameEntity
 import BaseFunctions
+from common_state.Feeding import Feeding
+
+HUNGER_LIMIT = 50
 
 class Explorer(GameEntity.GameEntity):
     """See file doctring for the description."""
@@ -17,18 +20,22 @@ class Explorer(GameEntity.GameEntity):
     def __init__(self, world, image_string):
         """Basic initialization for the class."""
 
-        GameEntity.GameEntity.__init__(self, world, "Explorer", "Entities/"+image_string)
+        GameEntity.GameEntity.__init__(self, world, "Explorer", "Entities/"+image_string,
+                                       consume_func=consume_func_villager)
 
         self.speed = 80.0 * (1.0 / 60.0)
         self.base_speed = self.speed
         self.view_range = 8
 
         self.exploring_state = Exploring(self)
+        self.feeding_state = Feeding(self)
 
         self.brain.add_state(self.exploring_state)
-        
+        self.brain.add_state(self.feeding_state)
+
         self.worldSize = world.world_size
         self.TileSize = self.world.tile_size
+        self.primary_state = "Exploring"
 
 class Exploring(aitools.StateMachine.State):
     """The primary function of the explorer, to search for places previously
@@ -51,6 +58,9 @@ class Exploring(aitools.StateMachine.State):
         """Check if the explorer should still be exploring"""
         if self.explorer.location.get_distance_to(self.explorer.destination) <= self.explorer.speed:
             BaseFunctions.random_dest(self.explorer)
+
+        if self.explorer.food < HUNGER_LIMIT:
+            return "Feeding"
 
     def exit_actions(self):
         """What the explorer does as it stops exploring"""

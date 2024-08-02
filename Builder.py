@@ -12,6 +12,8 @@ from random import *
 import pygame
 
 
+HUNGER_LIMIT = 60
+
 class Builder(GameEntity):
     def __init__(self, world, image, rest):
         GameEntity.__init__(world=world, name="Builder", image_string=image, consume_func=consume_func_villager)
@@ -96,3 +98,6 @@ class Builder_Idle(State):
     def check_conditions(self):
         if len(self.Builder.world.BuildingQueue) >= 1:
             return "Finding"
+
+        if self.Builder.food < HUNGER_LIMIT:
+            return "Feeding"

@@ -1,6 +1,7 @@
 import BaseFunctions
 import TileFuncs
 from aitools.StateMachine import State
+from configuration.villager_configuration import FEEDING_THRESHOLD
 
 
 class Feeding(State):
@@ -21,7 +22,15 @@ class Feeding(State):
 
     def check_conditions(self):
         if self.entity.location.get_distance_to(self.entity.destination) < 15:
-            self.entity.food = 100
+            # Temporary code, this logic of feeding the villagers should come after checking there is
+            # enough food in the village. It is giving food for free now, but the available food display in the status
+            # bar can go negative.
+            if self.entity.food < FEEDING_THRESHOLD:
+                self.entity.food = 100
+                if self.entity.world.fish > 0:
+                    self.entity.world.fish -= 1
+                elif self.entity.world.crop > 0:
+                    self.entity.world.crop -= 1
             return self.entity.primary_state
 
     def exit_actions(self):

@@ -1,4 +1,4 @@
-from builtins import function
+import asyncio
 
 from World import *
 from aitools.StateMachine import *
@@ -38,7 +38,7 @@ class GameEntity(object):
         self.energy = 70
         self.active_info = False
         self.consume_func = consume_func
-        self.consume_func()
+        # self.consume_func(self)
 
         self.brain = StateMachine()
 

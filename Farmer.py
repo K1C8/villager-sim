@@ -6,6 +6,7 @@ import aitools.StateMachine
 from Entities import *
 from GameEntity import *
 from common_state.Feeding import Feeding
+from async_funcs.entity_consumption import consume_func_villager
 from gametools.vector2 import Vector2
 from gametools.ImageFuncs import *
 from gametools.ani import *
@@ -14,6 +15,8 @@ import pygame
 import random
 import TileFuncs
 import BaseFunctions
+
+HUNGER_LIMIT = 40
 
 
 class Farmer(GameEntity):
@@ -74,7 +77,8 @@ class Farmer_Tilling(aitools.StateMachine.State):
             BaseFunctions.random_dest(self.farmer)
 
     def check_conditions(self):
-        pass
+        if self.farmer.food < HUNGER_LIMIT:
+            return "Feeding"
 
     def exit_actions(self):
         pass

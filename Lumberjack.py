@@ -9,6 +9,7 @@ import Tile
 import math
 import pygame
 import random
+from async_funcs.entity_consumption import consume_func_villager
 import TileFuncs
 from World import *
 import BaseFunctions
@@ -178,16 +179,15 @@ class Delivering(State):
 
         if self.lumberjack.location.get_distance_to(self.lumberjack.destination) < 15:
             self.lumberjack.world.wood += 5
-            return "Searching"
+            return "Feeding"
 
     def exit_actions(self):
-        self.lumberjack.destination = self.lumberjack.world.get_food_court()
         pass
 
 
-class IDLE(State):
+class Idling(State):
     def __init__(self, Lumberjack):
-        State.__init__(self, "Delivering")
+        State.__init__(self, "Idling")
         self.lumberjack = Lumberjack
 
     def entry_actions(self):

@@ -11,6 +11,9 @@ from World import *
 from async_funcs.entity_consumption import consume_func_villager
 #TODO: Clean up imports and add docstrings
 
+HUNGER_LIMIT = 40
+
+
 class Angler(GameEntity):
 
     def __init__(self, world, image_string):
@@ -79,7 +82,7 @@ class Fishing(State):
             #     if TileFuncs.get_tile(self.angler.world, tile_location).fishable:
             #         self.angler.hit = 0
             #         self.angler.fish = 1
-            self.angler.fish = 5
+            self.angler.fish = randint(5, 10)
             self.angler.hit = 0
 
     def entry_actions(self):
@@ -115,6 +118,9 @@ class Searching(State):
 
             BaseFunctions.random_dest(self.angler)
 
+        if self.angler.food < HUNGER_LIMIT:
+            return "Feeding"
+
     def exit_actions(self):
         pass
 
@@ -138,7 +144,7 @@ class Delivering(State):
         if self.angler.location.get_distance_to(self.angler.destination) < 15:
             self.angler.world.fish += self.angler.fish
             self.angler.fish = 0
-            return "Searching"
+            return "Feeding"
 
     def exit_actions(self):
         pass

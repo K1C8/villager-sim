@@ -12,6 +12,8 @@ import random
 import TileFuncs
 import BaseFunctions
 
+HUNGER_LIMIT = 40
+
 
 class Arborist(GameEntity):
 
@@ -64,6 +66,9 @@ class Arborist_Planting(State):
         if self.arborist.location.get_distance_to(self.arborist.destination) < 15:
             self.arborist.destination = Vector2(self.arborist.location)
             self.arborist.update()
+
+        if self.arborist.food < HUNGER_LIMIT:
+            return "Feeding"
 
     def do_actions(self):
 

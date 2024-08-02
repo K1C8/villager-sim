@@ -110,18 +110,21 @@ def run(fullscreen, world_size=64):
             debug_day_time_string =    "Time: " + str(int(game_world.time))
             debug_res_wood_string =    "Wood: " + str(game_world.wood)
             debug_res_fish_string =    "Fish: " + str(game_world.fish)
-            
+            debug_res_crop_string =    "Crop: " + str(game_world.crop)
+
             day_string_surface = debug_font.render(debug_day_string, True, (255, 255, 255)) 
             day_status_surface = debug_font.render(debug_day_status_string, True, (255, 255, 255))
             day_time_surface = debug_font.render(debug_day_time_string, True, (255, 255, 255))
             res_wood_surface = debug_font.render(debug_res_wood_string, True, (255, 255, 255))
             res_fish_surface = debug_font.render(debug_res_fish_string, True, (255, 255, 255))
+            res_crop_surface = debug_font.render(debug_res_crop_string, True, (255, 255, 255))
 
             screen.blit(day_string_surface, (10, 10))
             screen.blit(day_status_surface, (10, 40))
             screen.blit(day_time_surface, (10, 70))  
             screen.blit(res_wood_surface, (10, 100))
             screen.blit(res_fish_surface, (10, 130))
+            screen.blit(res_crop_surface, (10, 160))
 
         # Update the screen
         pygame.display.update()

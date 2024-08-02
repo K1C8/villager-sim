@@ -3,7 +3,7 @@ import pygame
 
 from GameEntity import GameEntity
 from gametools import vector2, VoronoiMapGen, MidpointDisplacement, PertTools
-from async_funcs.entity_consumption import consume_func_villager, consume_func_plant
+from configuration.world_configuration import DAYTIME_DURATION, NIGHTTIME_DURATION, DAY_DURATION
 import math
 import Tile
 import Clips
@@ -13,9 +13,6 @@ import Angler
 import Explorer
 import Arborist
 
-DAYTIME_DURATION = 38.0
-NIGHTTIME_DURATION = 22.0
-DAY_DURATION = DAYTIME_DURATION + NIGHTTIME_DURATION
 
 class World(object):
     """This class holds everything in the game. It also
@@ -223,7 +220,7 @@ class World(object):
                               "class": Explorer.Explorer}
                  }
                 
-        start_buildings = {"Barn": {"count": 0
+        start_buildings = {"Barn": {"count": 1
                                     },
                            "Lumber_Yard": {"count": 1
                                            }
@@ -294,7 +291,11 @@ class World(object):
             self.time = self.time - DAY_DURATION
             self.is_day = True
             self.day += 1
-        
+            for entity in self.entities.values():
+                if entity is not None:
+                    entity.consume_func(entity)
+
+
         for entity in self.entities.values():
             entity.process(delta)
 
@@ -364,8 +365,8 @@ class World(object):
             entity: The entity that is needed to be deleted, like the result of a death event.
 
         """
-        for entity in self.entities:
-            if entity == entity_to_delete:
+        for entity in self.entities.values():
+            if entity is not None and entity == entity_to_delete:
                 self.entities[entity_to_delete.id] = None
 
         del entity_to_delete
