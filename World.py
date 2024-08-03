@@ -338,11 +338,26 @@ class World(object):
             for entity in self.entities.values():
                 if entity is not None:
                     entity.consume_func(entity)
-
-
+ 
         for entity in self.entities.values():
             entity.process(delta)
+            
+        # entity creation logics
+        # Populate if there are enough of food for every one
+        print("Number of entities: ", len(self.entities))
+        if ((self.crop + self.fish) / len(self.entities)) >= 100 and (self.crop >= 100) and (self.fish >= 100):
+            
+            # Currenltly hardcoding farmer creation
+            farmer = Farmer.Farmer(self, "Farmer")
+            farmer.location = self.village_location 
+            farmer.brain.set_state("Tilling")
 
+            self.add_entity(farmer)
+            self.crop -= 100
+            self.fish -= 100
+            print("Farmer created") 
+           
+            
     def render(self, surface):
         """Blits the world_surface and all entities onto surface.
 
