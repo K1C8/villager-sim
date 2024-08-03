@@ -57,7 +57,7 @@ class Lumberjack(GameEntity):
         # Updates image every 10 cycles and adds 1 to the 4 hit dig
         self.image = self.sprites[self.animation.get_frame()]
         self.image.set_colorkey((255,0,255))
-        if self.animation.finished == True:
+        if self.animation.finished:
             self.hit += 1
             self.animation.finished = False
 

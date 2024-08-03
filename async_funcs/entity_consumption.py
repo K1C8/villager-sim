@@ -13,20 +13,19 @@ async def sleep(duration):
 
 def consume_func_villager(entity: GameEntity):
     # asyncio.run(sleep(DAY_DURATION))
-    if entity.food > VILLAGER_FOOD_CONSUMPTION_RATE:
-        print("Entity " + entity.name + " consumed food " + str(VILLAGER_FOOD_CONSUMPTION_RATE))
-        entity.food -= VILLAGER_FOOD_CONSUMPTION_RATE
-    else:
+    print("Entity " + entity.name + " consumed food " + str(VILLAGER_FOOD_CONSUMPTION_RATE))
+    entity.food -= VILLAGER_FOOD_CONSUMPTION_RATE
+    if entity.food <= 0:
         entity.death()
         return
 
 
 def consume_func_plant(entity: GameEntity):
     # asyncio.run(sleep(DAY_DURATION))
-    if entity.water > 2:
-        entity.water -= 2
-    else:
+    entity.water -= PLANT_WATER_CONSUMPTION_RATE
+    if entity.water <= 0:
         entity.death()
+        return
 
 
 

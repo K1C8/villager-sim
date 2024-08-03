@@ -42,10 +42,29 @@ class Farmer(GameEntity):
 
         self.worldSize = world.world_size
         self.TileSize = self.world.tile_size
-        self.primary_state = "Tilling"
+        self.primary_state = "Searching"
+
+        # animation variables
+        self.animation = Ani(6, 10)
+        self.pic = pygame.image.load("Images/Entities/map.png")
+        self.img_func = ImageFuncs(18, 17, self.pic)
+        self.sprites = self.img_func.get_images(6, 3, 0)
+        self.hit = 0
+        self.update()
+
+    def update(self):
+        # Updates image every 10 cycles and adds 1 to the 4 hit dig
+        self.image = self.sprites[self.animation.get_frame()]
+        self.image.set_colorkey((255, 0, 255))
+        if self.animation.finished:
+            self.hit += 1
+            self.animation.finished = False
 
 class Farmer_Tilling(aitools.StateMachine.State):
-    
+    """
+    This state will be used to have the Farmer tiling.
+    """
+
     def __init__(self, farmer):
         aitools.StateMachine.State.__init__(self, "Tilling")
         self.farmer = farmer
@@ -84,3 +103,65 @@ class Farmer_Tilling(aitools.StateMachine.State):
     def exit_actions(self):
         pass
 
+
+class Farmer_Searching(aitools.StateMachine.State):
+    """
+    This state will be used to have the Farmer looking for
+    tile to tile, It needs to be fast enough to have AT LEAST 20 Farmers
+    with little to no framerate loss.
+
+    Perhaps it could be used to find a clump of open grass. and then the Lumberjack
+    wouldn't just wander around aimlessly searching for trees even though it
+    saw some when it was just at another tree
+    """
+
+    def __init__(self, farmer):
+        aitools.StateMachine.State.__init__(self, "Tilling")
+        self.farmer = farmer
+
+    def entry_actions(self):
+        BaseFunctions.random_dest(self.farmer)
+
+    def do_actions(self):
+        pass
+
+    def check_conditions(self):
+        if self.farmer.location.get_distance_to(self.farmer.destination) < 15:
+            location_array = TileFuncs.get_vnn_array(self.farmer.world, self.farmer.location, self.farmer.view_range)
+
+            for location in location_array:
+                test_tile = TileFuncs.get_tile(self.farmer.world, location)
+                if test_tile.name == "MinecraftGrass":
+                    self.farmer.Tree_tile = test_tile
+                    self.farmer.tree_id = test_tile.id
+
+                    self.farmer.destination = location.copy()
+                    return "Tiling"
+
+            BaseFunctions.random_dest(self.lumberjack)
+
+        if self.farmer.food < HUNGER_LIMIT:
+            return "Feeding"
+
+    def exit_actions(self):
+        pass
+
+class Farmer_Sowing(aitools.StateMachine.State):
+
+    def __init__(self, farmer):
+        aitools.StateMachine.State.__init__(self, "Sowing")
+        self.farmer = farmer
+
+    def entry_actions(self):
+        # BaseFunctions.random_dest(self.farmer)
+        pass
+
+    def do_actions(self):
+        pass
+
+    def check_conditions(self):
+        if self.farmer.food < HUNGER_LIMIT:
+            return "Feeding"
+
+    def exit_actions(self):
+        pass

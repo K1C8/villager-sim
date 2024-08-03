@@ -1,3 +1,4 @@
+import copy
 import sys
 import pygame
 
@@ -256,7 +257,7 @@ class World(object):
                               "class": Arborist.Arborist},
 
                  "Farmer": {"count": 0,
-                            "state": "Tilling",
+                            "state": "Searching",
                             "class": Farmer.Farmer},
 
                  "Explorer": {"count": 1,
@@ -273,7 +274,7 @@ class World(object):
         for key in start.keys():
             for count in range(start[key]["count"]):
                 new_ent = start[key]["class"](self, key)
-                new_ent.location = self.village_location
+                new_ent.location = copy.deepcopy(self.village_location)
                 new_ent.brain.set_state(start[key]["state"])
                 self.add_entity(new_ent)
                 
@@ -283,10 +284,10 @@ class World(object):
                 # self.add_building()
                 # temporary codes
                 if key == "Lumber_Yard":
-                    location = self.village_location
+                    location = copy.deepcopy(self.village_location)
                     self.lumber_yard[0] = location
                 elif key == "Barn":
-                    location = self.village_location
+                    location = copy.deepcopy(self.village_location)
                     self.barn[0] = location
 
     def add_entity(self, entity):
@@ -338,26 +339,26 @@ class World(object):
             for entity in self.entities.values():
                 if entity is not None:
                     entity.consume_func(entity)
- 
+
         for entity in self.entities.values():
             entity.process(delta)
-            
+
         # entity creation logics
         # Populate if there are enough of food for every one
-        print("Number of entities: ", len(self.entities))
+        # print("Number of entities: ", len(self.entities))
         if ((self.crop + self.fish) / len(self.entities)) >= 100 and (self.crop >= 100) and (self.fish >= 100):
-            
+
             # Currenltly hardcoding farmer creation
             farmer = Farmer.Farmer(self, "Farmer")
-            farmer.location = self.village_location 
-            farmer.brain.set_state("Tilling")
+            farmer.location = copy.deepcopy(self.village_location)
+            farmer.brain.set_state(farmer.primary_state)
 
             self.add_entity(farmer)
             self.crop -= 100
             self.fish -= 100
-            print("Farmer created") 
-           
-            
+            print("Farmer created")
+
+
     def render(self, surface):
         """Blits the world_surface and all entities onto surface.
 
