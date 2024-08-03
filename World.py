@@ -51,7 +51,9 @@ class World(object):
         # self.DAYTIME_DURATION = 38.0
         # self.NIGHTTIME_DURATION = 22.0
         # self.DAY_DURATION = DAYTIME_DURATION + NIGHTTIME_DURATION
-        
+
+        self.village_location = vector2.Vector2(self.w / 2, self.h / 2)
+
         # Entities
         self.entities = {}
         self.buildings = {}
@@ -61,7 +63,10 @@ class World(object):
         self.lumber_yard = {}
         self.barn = {}
 
+        self.fields = []
+
         self.new_world(tile_dimensions)
+        self.populate()
         self.clipper = Clips.Clips(self, screen_size)
 
     def new_world(self, array_size):
@@ -185,7 +190,46 @@ class World(object):
 
                 self.tile_array[tile_y][tile_x] = new_tile
 
-        self.populate()
+    def find_starting_point(self):
+        # Calculate 8x8 block count in width
+        w_block_count = (self.w / 8)
+        # Calculate 8x8 block count in height
+        h_block_count = (self.h / 8)
+        # List of all suitable blocks to start. These tiles at least can allocate 4 buildings
+        suitable_starting_blocks = []
+        # List of all best blocks to start. These tiles at least can allocate 6 buildings and have ample neighboring
+        # GrassTiles or TreePlantedTiles
+        best_starting_blocks = []
+        # Matrix to store GrassTiles and TreePlantedTiles in each block
+        crop_plantable_count_matrix = []
+        # Skipping all 8x8 blocks on the edges of the map
+        for block_w_coordinate in range(1, w_block_count):
+            for block_h_coordinate in range(1, h_block_count):
+                block_upleft_tile = vector2.Vector2(block_w_coordinate * 8, block_h_coordinate * 8)
+                arable_tiles = 0
+                immediately_buildable_tiles = 0
+                buildable_lot_count = 0
+                for x in range(0, 8):
+                    for y in range(0, 8):
+                        tile = self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y]
+                        if (isinstance(tile, Tile.GrassTile) or isinstance(tile, Tile.TreePlantedTile)
+                                or isinstance(tile, Tile.Baby_Tree)):
+                            arable_tiles += 1
+                        if x % 2 == 0 and y % 2 == 0:
+                            lot_tiles = [self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y],
+                                         self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y + 1],
+                                         self.tile_array[block_w_coordinate * 8 + x + 1][block_h_coordinate * 8 + y],
+                                         self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y + 1]]
+                            lot_buildable = True
+                            for tile in lot_tiles:
+                                if not tile.buildable:
+                                    lot_buildable = False
+                            if lot_buildable:
+                                buildable_lot_count += 1
+                if buildable_lot_count > 3:
+                    suitable_starting_blocks.append(block_upleft_tile)
+
+        return
 
     def populate(self):
         """Populates the world with entities.
@@ -229,7 +273,7 @@ class World(object):
         for key in start.keys():
             for count in range(start[key]["count"]):
                 new_ent = start[key]["class"](self, key)
-                new_ent.location = vector2.Vector2(self.w / 2, self.h / 2)
+                new_ent.location = self.village_location
                 new_ent.brain.set_state(start[key]["state"])
                 self.add_entity(new_ent)
                 
@@ -239,10 +283,10 @@ class World(object):
                 # self.add_building()
                 # temporary codes
                 if key == "Lumber_Yard":
-                    location = vector2.Vector2(self.w / 2, self.h / 2)
+                    location = self.village_location
                     self.lumber_yard[0] = location
                 elif key == "Barn":
-                    location = vector2.Vector2(self.w / 2, self.h / 2)
+                    location = self.village_location
                     self.barn[0] = location
 
     def add_entity(self, entity):

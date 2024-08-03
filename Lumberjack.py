@@ -135,7 +135,10 @@ class Chopping(State):
                 darkness = pygame.Surface((32, 32))
                 darkness.set_alpha(old_tile.darkness)
 
-                new_tile = Tile.TreePlantedTile(self.lumberjack.world, "MinecraftGrass")
+                # Replacing "GrassWithCenterTree" with TreePlantedTile will prevent Arborist to plant again,
+                # temporarily changed to Grass. This is to be discussed with other team members.
+                # new_tile = Tile.TreePlantedTile(self.lumberjack.world, "MinecraftGrass")
+                new_tile = Tile.GrassTile(self.lumberjack.world, "MinecraftGrass")
 
                 new_tile.darkness = old_tile.darkness
 

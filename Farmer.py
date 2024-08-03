@@ -69,6 +69,7 @@ class Farmer_Tilling(aitools.StateMachine.State):
             self.farmer.world.tile_array[int(new_tile.location.y / 32)][int(new_tile.location.x / 32)] = new_tile
             self.farmer.world.world_surface.blit(new_tile.img, new_tile.location)
             self.farmer.world.world_surface.blit(darkness, new_tile.location)
+            self.farmer.world.fields.append(new_tile)
             # TODO: Update the minimap
 
             BaseFunctions.random_dest(self.farmer)

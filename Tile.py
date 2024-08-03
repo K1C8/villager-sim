@@ -95,3 +95,15 @@ class SoilTile(Tile):
         Tile.__init__(self, world, tile_name)
         self.walkable = True
         self.crop_plantable = True
+
+
+class ShootFieldTile(Tile):
+    def __init__(self, world, tile_name):
+        Tile.__init__(self, world, tile_name)
+        self.walkable = True
+
+
+class MatureFieldTile(Tile):
+    def __init__(self, world, tile_name):
+        Tile.__init__(self, world, tile_name)
+        self.walkable = True
