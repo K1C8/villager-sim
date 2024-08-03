@@ -60,6 +60,8 @@ class World(object):
         self.buildings = {}
         self.entity_id = 0
         self.building_id = 0
+
+        self.farmer_count = 0
         
         self.lumber_yard = {}
         self.barn = {}
@@ -304,6 +306,9 @@ class World(object):
         self.entities[self.entity_id] = entity
         entity.id = self.entity_id
         self.entity_id += 1
+        if isinstance(entity, Farmer.Farmer):
+            self.farmer_count += 1
+
 
     def add_building(self, building):
         self.buildings[self.building_id] = building

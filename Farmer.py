@@ -7,6 +7,7 @@ from Entities import *
 from GameEntity import *
 from common_state.Feeding import Feeding
 from async_funcs.entity_consumption import consume_func_villager
+from configuration.world_configuration import TILES_PER_FARMER
 from gametools.vector2 import Vector2
 from gametools.ImageFuncs import *
 from gametools.ani import *
@@ -29,14 +30,19 @@ class Farmer(GameEntity):
         GameEntity.__init__(self, world, "Farmer", "Entities/"+image_string, consume_func=consume_func_villager)
 
         # Creating the states
-        tilling_state = Farmer_Tilling(self)
+        tilling_state = FarmerTilling(self)
         feeding_state = Feeding(self)
+        searching_state = FarmerSearching(self)
+        sowing_state = FarmerSowing(self)
 
         # Adding states to the brain
         self.brain.add_state(tilling_state)
         self.brain.add_state(feeding_state)
+        self.brain.add_state(searching_state)
+        self.brain.add_state(sowing_state)
 
         self.max_speed = 80.0 * (1.0 / 60.0)
+        self.view_range = 1
         self.speed = self.max_speed
         self.base_speed = self.speed
 
@@ -48,7 +54,7 @@ class Farmer(GameEntity):
         self.animation = Ani(6, 10)
         self.pic = pygame.image.load("Images/Entities/map.png")
         self.img_func = ImageFuncs(18, 17, self.pic)
-        self.sprites = self.img_func.get_images(6, 3, 0)
+        self.sprites = self.img_func.get_images(6, 0, 3)
         self.hit = 0
         self.update()
 
@@ -60,7 +66,8 @@ class Farmer(GameEntity):
             self.hit += 1
             self.animation.finished = False
 
-class Farmer_Tilling(aitools.StateMachine.State):
+
+class FarmerTilling(aitools.StateMachine.State):
     """
     This state will be used to have the Farmer tiling.
     """
@@ -73,30 +80,51 @@ class Farmer_Tilling(aitools.StateMachine.State):
         BaseFunctions.random_dest(self.farmer)
 
     def do_actions(self):
-        current_tile = TileFuncs.get_tile(self.farmer.world, self.farmer.location)
-        if current_tile.tillable:
-            darkness = pygame.Surface((self.farmer.TileSize, self.farmer.TileSize))
-            darkness.set_alpha(current_tile.darkness)
+        pass
 
-            new_tile = Tile.SoilTile(self.farmer.world, "Soil2")
-            new_tile.darkness = darkness
+    def check_conditions(self):
+        # If there is no more room to add another tile to farm, return to searching
+        if self.farmer.world.farmer_count * TILES_PER_FARMER <= len(self.farmer.world.fields):
+            return self.farmer.primary_state    # "Searching"
 
-            new_tile.location = current_tile.location
-            new_tile.rect.topleft = new_tile.location
-            new_tile.color = current_tile.color # TODO: Figure out what this does.
+        check = TileFuncs.get_tile(self.farmer.world, Vector2(self.farmer.location))
+        if self.farmer.location.get_distance_to(self.farmer.destination) < 15 and check.tillable:
+            self.farmer.destination = Vector2(self.farmer.location)
 
-            self.farmer.world.tile_array[int(new_tile.location.y / 32)][int(new_tile.location.x / 32)] = new_tile
-            self.farmer.world.world_surface.blit(new_tile.img, new_tile.location)
-            self.farmer.world.world_surface.blit(darkness, new_tile.location)
-            self.farmer.world.fields.append(new_tile)
-            # TODO: Update the minimap
+            if check.name != "MinecraftGrass":
+                self.farmer.hit = 0
+                self.farmer.update()
+                return "Searching"
 
-            BaseFunctions.random_dest(self.farmer)
+            self.farmer.update()
+
+            if self.farmer.hit >= 4:
+                self.farmer.update()
+                darkness = pygame.Surface((self.farmer.TileSize, self.farmer.TileSize))
+                darkness.set_alpha(check.darkness)
+
+                new_tile = Tile.SoilTile(self.farmer.world, "Soil2")
+                new_tile.darkness = darkness
+
+                new_tile.location = check.location
+                new_tile.rect.topleft = new_tile.location
+                # new_tile.color = check.color # TODO: Figure out what this does.
+
+                self.farmer.world.tile_array[int(new_tile.location.y / 32)][int(new_tile.location.x / 32)] = new_tile
+                self.farmer.world.world_surface.blit(new_tile.img, new_tile.location)
+                self.farmer.world.world_surface.blit(darkness, new_tile.location)
+                self.farmer.world.fields.append(new_tile)
+
+                # TODO: Update the minimap
+
+                self.farmer.hit = 0
+
+                return "Searching"
 
         elif self.farmer.location.get_distance_to(self.farmer.destination) < self.farmer.speed:
             BaseFunctions.random_dest(self.farmer)
 
-    def check_conditions(self):
+        # If the entity is hungry, go back to the village and feed themselves
         if self.farmer.food < HUNGER_LIMIT:
             return "Feeding"
 
@@ -104,7 +132,7 @@ class Farmer_Tilling(aitools.StateMachine.State):
         pass
 
 
-class Farmer_Searching(aitools.StateMachine.State):
+class FarmerSearching(aitools.StateMachine.State):
     """
     This state will be used to have the Farmer looking for
     tile to tile, It needs to be fast enough to have AT LEAST 20 Farmers
@@ -116,7 +144,7 @@ class Farmer_Searching(aitools.StateMachine.State):
     """
 
     def __init__(self, farmer):
-        aitools.StateMachine.State.__init__(self, "Tilling")
+        aitools.StateMachine.State.__init__(self, "Searching")
         self.farmer = farmer
 
     def entry_actions(self):
@@ -136,9 +164,9 @@ class Farmer_Searching(aitools.StateMachine.State):
                     self.farmer.tree_id = test_tile.id
 
                     self.farmer.destination = location.copy()
-                    return "Tiling"
+                    return "Tilling"
 
-            BaseFunctions.random_dest(self.lumberjack)
+            BaseFunctions.random_dest(self.farmer)
 
         if self.farmer.food < HUNGER_LIMIT:
             return "Feeding"
@@ -146,7 +174,8 @@ class Farmer_Searching(aitools.StateMachine.State):
     def exit_actions(self):
         pass
 
-class Farmer_Sowing(aitools.StateMachine.State):
+
+class FarmerSowing(aitools.StateMachine.State):
 
     def __init__(self, farmer):
         aitools.StateMachine.State.__init__(self, "Sowing")

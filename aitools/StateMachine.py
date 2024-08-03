@@ -30,8 +30,10 @@ class StateMachine(object):
         if self.active_state is None:
             return
 
+        # Perform actions as the current state indicates
         self.active_state.do_actions()
 
+        # Check if conditions are met to switch to next state
         new_state_name = self.active_state.check_conditions()
         if new_state_name is not None:
             self.set_state(new_state_name)
