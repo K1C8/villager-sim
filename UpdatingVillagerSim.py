@@ -111,6 +111,8 @@ def run(fullscreen, world_size=64):
             debug_res_wood_string =    "Wood: " + str(game_world.wood)
             debug_res_fish_string =    "Fish: " + str(game_world.fish)
             debug_res_crop_string =    "Crop: " + str(game_world.crop)
+            debug_res_stone_string =    "Stone: " + "N/A"
+            debug_res_entity_count =   "Entities: " + str(len(game_world.entities))
 
             day_string_surface = debug_font.render(debug_day_string, True, (255, 255, 255)) 
             day_status_surface = debug_font.render(debug_day_status_string, True, (255, 255, 255))
@@ -118,13 +120,44 @@ def run(fullscreen, world_size=64):
             res_wood_surface = debug_font.render(debug_res_wood_string, True, (255, 255, 255))
             res_fish_surface = debug_font.render(debug_res_fish_string, True, (255, 255, 255))
             res_crop_surface = debug_font.render(debug_res_crop_string, True, (255, 255, 255))
+            res_stone_surface = debug_font.render(debug_res_stone_string, True, (255, 255, 255))
+            res_entity_count_surface = debug_font.render(debug_res_entity_count, True, (255, 255, 255))
 
-            screen.blit(day_string_surface, (10, 10))
-            screen.blit(day_status_surface, (10, 40))
-            screen.blit(day_time_surface, (10, 70))  
-            screen.blit(res_wood_surface, (10, 100))
-            screen.blit(res_fish_surface, (10, 130))
-            screen.blit(res_crop_surface, (10, 160))
+            debug_string_positions = [
+                (10, 10),
+                (10, 40),
+                (10, 70),
+                (10, 100),
+                (10, 130),
+                (10, 160),
+                (10, 190),
+                (10, 220) 
+            ] 
+           
+            surfaces = [
+                day_string_surface,
+                day_status_surface,
+                day_time_surface,
+                res_wood_surface,
+                res_fish_surface,
+                res_crop_surface,
+                res_stone_surface,
+                res_entity_count_surface
+            ] 
+           
+           # Draw rectangles and blit text surfaces
+            for pos, surface in zip(debug_string_positions, surfaces):
+                rect = surface.get_rect(topleft=pos)
+                pygame.draw.rect(screen, (0, 0, 0), rect)  # Draw black rectangle
+                screen.blit(surface, pos)  # Blit text surface 
+            # screen.blit(day_string_surface, (10, 10))
+            # screen.blit(day_status_surface, (10, 40))
+            # screen.blit(day_time_surface, (10, 70))  
+            # screen.blit(res_wood_surface, (10, 100))
+            # screen.blit(res_fish_surface, (10, 130))
+            # screen.blit(res_crop_surface, (10, 160))
+            # screen.blit(res_stone_surface, (10, 190))
+            # screen.blit(res_entity_count_surface, (10, 220))
 
         # Update the screen
         pygame.display.update()
