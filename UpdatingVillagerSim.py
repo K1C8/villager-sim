@@ -67,6 +67,10 @@ def run(fullscreen, world_size=64):
 
             elif event.type == pygame.KEYDOWN:
 
+                if event.key == pygame.K_F1:
+                    global DEBUG_MODE
+                    DEBUG_MODE = not DEBUG_MODE
+                    
                 # Escape key pressed
                 if event.key == pygame.K_ESCAPE:
                     done = True
