@@ -10,7 +10,6 @@ may take up more than one cell.
 
 class ImageFuncs():
 
-
     def __init__(self, w_cell, h_cell, img):
         """
         :param w_cell: width of one cell

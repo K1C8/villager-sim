@@ -1,15 +1,15 @@
 from aitools.StateMachine import *
-import GameEntity
+from GameEntity import GameEntity
 from gametools.vector2 import Vector2
 import glob
 
-import ImageFuncs
+from gametools.ImageFuncs import ImageFuncs
 import pygame
 
 
-class Building(GameEntity.GameEntity):
-    def __init(self, world, name, image_string="Inn"):
-        GameEntity.__init__(self, world, name, "Buildings/"+image_string)
+class Building(GameEntity):
+    def __init__(self, world, name, image_string="Inn"):
+        GameEntity.__init__(self, world, name, "Buildings/"+image_string, None)
 
         self.image_funcs = ImageFuncs(32, 32, pygame.image.load("Images/Buildings/TotalImage.png"))
         self.tile_x, self.tile_y = pos

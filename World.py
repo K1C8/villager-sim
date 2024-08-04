@@ -62,18 +62,28 @@ class World(object):
         self.building_id = 0
 
         self.farmer_count = 0
-        
+
         self.lumber_yard = {}
         self.barn = {}
 
         self.fields = []
+        self.tile_array = [[Tile.Tile]]
 
-        self.new_world(tile_dimensions)
+        # If a new world have no places suitable to start, then create the world again until it has one.
+        has_found_starting_point = False
+        while not has_found_starting_point:
+            self.new_world(tile_dimensions)
+            starting_point = self.find_starting_point()
+            if starting_point is not None:
+                has_found_starting_point = True
+                self.village_location = vector2.Vector2(starting_point.x * 32, starting_point.y * 32)
+                self.village_location_tile = copy.deepcopy(starting_point)
+
         self.populate()
         self.clipper = Clips.Clips(self, screen_size)
 
     def new_world(self, array_size):
-        """Creates a new world (including all of the entities)
+        """Creates a new world (including all entities)
 
         Args:
             array_size: The size of the tile array, same as tile_dimensions
@@ -96,9 +106,8 @@ class World(object):
         # vor_map = map_generator.radial_drop(PertTools.pertubate(combined_map, pert_map), 1.5, 0.0)
         # vor_map = map_generator.radial_drop(mid_map, 1.5, 0.0)
 
-
-        vor_map = map_generator.radial_drop(map_generator.negative(map_generator.reallyCoolFull(array_size, num_p=23)), max_scalar=1.5, min_scalar=0.0)
-
+        vor_map = map_generator.radial_drop(map_generator.negative(map_generator.reallyCoolFull(array_size, num_p=23)),
+                                            max_scalar=1.5, min_scalar=0.0)
 
         # All grass map for testing
         # vor_map = [[150 for x in range(128)] for y in range(128) ]
@@ -195,23 +204,25 @@ class World(object):
 
     def find_starting_point(self):
         # Calculate 8x8 block count in width
-        w_block_count = (self.w / 8)
+        w_block_count = int(self.w / 32 // 8)
         # Calculate 8x8 block count in height
-        h_block_count = (self.h / 8)
-        # List of all suitable blocks to start. These tiles at least can allocate 4 buildings
+        h_block_count = int(self.h / 32 // 8)
+        print("W block count: " + str(w_block_count) + " , H block count: " + str(h_block_count))
+        # List of all suitable blocks to start. These tiles at least can allocate 6 buildings
         suitable_starting_blocks = []
         # List of all best blocks to start. These tiles at least can allocate 6 buildings and have ample neighboring
         # GrassTiles or TreePlantedTiles
         best_starting_blocks = []
         # Matrix to store GrassTiles and TreePlantedTiles in each block
-        crop_plantable_count_matrix = []
+        arable_tiles_matrix = [[0 for w in range(0, w_block_count)] for h in range(0, h_block_count)]
         # Skipping all 8x8 blocks on the edges of the map
         for block_w_coordinate in range(1, w_block_count):
             for block_h_coordinate in range(1, h_block_count):
                 block_upleft_tile = vector2.Vector2(block_w_coordinate * 8, block_h_coordinate * 8)
                 arable_tiles = 0
-                immediately_buildable_tiles = 0
-                buildable_lot_count = 0
+                buildable_lots = 0
+
+                # Calculate arable_tiles and buildable_lots
                 for x in range(0, 8):
                     for y in range(0, 8):
                         tile = self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y]
@@ -228,11 +239,31 @@ class World(object):
                                 if not tile.buildable:
                                     lot_buildable = False
                             if lot_buildable:
-                                buildable_lot_count += 1
-                if buildable_lot_count > 3:
+                                buildable_lots += 1
+                if buildable_lots > 5:
                     suitable_starting_blocks.append(block_upleft_tile)
-
-        return
+                arable_tiles_matrix[block_w_coordinate][block_h_coordinate] = arable_tiles
+        print(suitable_starting_blocks)
+        print(arable_tiles_matrix)
+        for starting_block in suitable_starting_blocks:
+            w_block = int(starting_block.x) // 8
+            h_block = int(starting_block.y) // 8
+            if w_block is not None and h_block is not None and 0 < w_block < (w_block_count - 1) and 0 < h_block < (h_block_count - 1):
+                surround_arable_tiles = (arable_tiles_matrix[w_block - 1][h_block - 1] +
+                                         arable_tiles_matrix[w_block][h_block - 1] +
+                                         arable_tiles_matrix[w_block + 1][h_block - 1] +
+                                         arable_tiles_matrix[w_block - 1][h_block] +
+                                         arable_tiles_matrix[w_block + 1][h_block] +
+                                         arable_tiles_matrix[w_block - 1][h_block + 1] +
+                                         arable_tiles_matrix[w_block][h_block + 1] +
+                                         arable_tiles_matrix[w_block + 1][h_block + 1])
+                print("Checking block w_block: " + str(w_block) + ", h_block: " + str(h_block) + ", surrounding " +
+                      "arable tiles count is: " + str(surround_arable_tiles))
+                if surround_arable_tiles > 160:
+                    best_starting_blocks.append(starting_block)
+        print(best_starting_blocks)
+        print(best_starting_blocks[len(best_starting_blocks) // 2])
+        return best_starting_blocks[len(best_starting_blocks) // 2]
 
     def populate(self):
         """Populates the world with entities.
@@ -266,12 +297,12 @@ class World(object):
                               "state": "Exploring",
                               "class": Explorer.Explorer}
                  }
-                
+
         start_buildings = {"Barn": {"count": 1
                                     },
                            "Lumber_Yard": {"count": 1
                                            }
-                          }
+                           }
 
         for key in start.keys():
             for count in range(start[key]["count"]):
@@ -279,7 +310,7 @@ class World(object):
                 new_ent.location = copy.deepcopy(self.village_location)
                 new_ent.brain.set_state(start[key]["state"])
                 self.add_entity(new_ent)
-                
+
         for key in start_buildings.keys():
             for count in range(start_buildings[key]["count"]):
                 # new_building initial function call
@@ -309,7 +340,6 @@ class World(object):
         if isinstance(entity, Farmer.Farmer):
             self.farmer_count += 1
 
-
     def add_building(self, building):
         self.buildings[self.building_id] = building
         building.id = self.building_id
@@ -317,7 +347,8 @@ class World(object):
 
         for tile_x in range(building.image.get_width()):
             for tile_y in range(building.image.get_height()):
-                self.tile_array[building.location.y + tile_y][building.location.x + tile_x] = Tile.BuildingTile(self, "MinecraftGrass")
+                self.tile_array[building.location.y + tile_y][building.location.x + tile_x] = (
+                    Tile.BuildingTile(self, "MinecraftGrass"))
         self.world_surface.blit(building.image, building.location * self.tile_size)
 
     def process(self, delta):
@@ -329,7 +360,7 @@ class World(object):
         Returns:
             None
         """
-        
+
         # time increment and day/night cycle
         self.time += delta
         # if self.is_day and self.time > self.DAYTIME_DURATION:
@@ -352,7 +383,6 @@ class World(object):
         # Populate if there are enough of food for every one
         # print("Number of entities: ", len(self.entities))
         if ((self.crop + self.fish) / len(self.entities)) >= 100 and (self.crop >= 100) and (self.fish >= 100):
-
             # Currenltly hardcoding farmer creation
             farmer = Farmer.Farmer(self, "Farmer")
             farmer.location = copy.deepcopy(self.village_location)
@@ -362,7 +392,6 @@ class World(object):
             self.crop -= 100
             self.fish -= 100
             print("Farmer created")
-
 
     def render(self, surface):
         """Blits the world_surface and all entities onto surface.
@@ -410,8 +439,7 @@ class World(object):
         """
 
         if (mouse_pos.x > self.clipper.minimap_rect.x and
-            mouse_pos.y > self.clipper.minimap_rect.y):
-
+                mouse_pos.y > self.clipper.minimap_rect.y):
             x_temp_1 = -self.clipper.a * (mouse_pos.x - self.clipper.minimap_rect.x)
             x_temp_2 = self.clipper.rect_view_w * self.clipper.a
             self.world_position.x = x_temp_1 + (x_temp_2 / 2)
