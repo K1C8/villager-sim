@@ -117,6 +117,11 @@ def run(fullscreen, world_size=64):
             debug_res_crop_string =    "Crop: " + str(game_world.crop)
             debug_res_stone_string =    "Stone: " + "N/A"
             debug_res_entity_count =   "Entities: " + str(len(game_world.entities))
+            debug_farmer_count =       "Farmers: " + str(game_world.farmer_count)
+            debug_lumberjack_count =   "Lumberjacks: " + str(game_world.lumberjack_count)
+            debug_angler_count =       "Anglers: " + str(game_world.angler_count)
+            debug_explorer_count =     "Explorers: " + str(game_world.explorer_count)
+            debug_arborist_count =     "Arborists: " + str(game_world.arborist_count)
 
             day_string_surface = debug_font.render(debug_day_string, True, (255, 255, 255)) 
             day_status_surface = debug_font.render(debug_day_status_string, True, (255, 255, 255))
@@ -126,6 +131,11 @@ def run(fullscreen, world_size=64):
             res_crop_surface = debug_font.render(debug_res_crop_string, True, (255, 255, 255))
             res_stone_surface = debug_font.render(debug_res_stone_string, True, (255, 255, 255))
             res_entity_count_surface = debug_font.render(debug_res_entity_count, True, (255, 255, 255))
+            farmer_count_s = debug_font.render(debug_farmer_count, True, (255, 255, 255))
+            lumberjack_count_s = debug_font.render(debug_lumberjack_count, True, (255, 255, 255))
+            angler_count_s = debug_font.render(debug_angler_count, True, (255, 255, 255))
+            explorer_count_s = debug_font.render(debug_explorer_count, True, (255, 255, 255))
+            arborist_count_s = debug_font.render(debug_arborist_count, True, (255, 255, 255))
 
             debug_string_positions = [
                 (10, 10),
@@ -135,7 +145,12 @@ def run(fullscreen, world_size=64):
                 (10, 130),
                 (10, 160),
                 (10, 190),
-                (10, 220) 
+                (10, 220),
+                (10, 250),
+                (10, 280),
+                (10, 310),
+                (10, 340),
+                (10, 370),
             ] 
            
             surfaces = [
@@ -146,7 +161,12 @@ def run(fullscreen, world_size=64):
                 res_fish_surface,
                 res_crop_surface,
                 res_stone_surface,
-                res_entity_count_surface
+                res_entity_count_surface,
+                farmer_count_s,
+                lumberjack_count_s,
+                angler_count_s,
+                explorer_count_s,
+                arborist_count_s, 
             ] 
            
            # Draw rectangles and blit text surfaces
@@ -154,14 +174,6 @@ def run(fullscreen, world_size=64):
                 rect = surface.get_rect(topleft=pos)
                 pygame.draw.rect(screen, (0, 0, 0), rect)  # Draw black rectangle
                 screen.blit(surface, pos)  # Blit text surface 
-            # screen.blit(day_string_surface, (10, 10))
-            # screen.blit(day_status_surface, (10, 40))
-            # screen.blit(day_time_surface, (10, 70))  
-            # screen.blit(res_wood_surface, (10, 100))
-            # screen.blit(res_fish_surface, (10, 130))
-            # screen.blit(res_crop_surface, (10, 160))
-            # screen.blit(res_stone_surface, (10, 190))
-            # screen.blit(res_entity_count_surface, (10, 220))
 
         # Update the screen
         pygame.display.update()

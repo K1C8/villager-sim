@@ -62,6 +62,11 @@ class World(object):
         self.building_id = 0
 
         self.farmer_count = 0
+        self.lumberjack_count = 0
+        self.angler_count = 0
+        self.explorer_count = 0
+        self.arborist_count = 0
+
 
         self.lumber_yard = {}
         self.barn = {}
@@ -337,8 +342,17 @@ class World(object):
         self.entities[self.entity_id] = entity
         entity.id = self.entity_id
         self.entity_id += 1
+        
         if isinstance(entity, Farmer.Farmer):
             self.farmer_count += 1
+        elif isinstance(entity, Lumberjack.Lumberjack):
+            self.lumberjack_count += 1
+        elif isinstance(entity, Angler.Angler):
+            self.angler_count += 1
+        elif isinstance(entity, Explorer.Explorer):
+            self.explorer_count += 1
+        elif isinstance(entity, Arborist.Arborist):
+            self.arborist_count += 1
 
     def add_building(self, building):
         self.buildings[self.building_id] = building
