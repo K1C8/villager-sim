@@ -16,7 +16,7 @@ HUNGER_LIMIT = 60
 
 class Builder(GameEntity):
     def __init__(self, world, image, rest):
-        GameEntity.__init__(world=world, name="Builder", image_string=image, consume_func=consume_func_villager)
+        GameEntity.__init__(self, world=world, name="Builder", image_string=image, consume_func=consume_func_villager)
 
         self.current_build = None
 

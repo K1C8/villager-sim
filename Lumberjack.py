@@ -34,12 +34,14 @@ class Lumberjack(GameEntity):
         self.chopping_state = Chopping(self)
         self.delivering_state = Delivering(self)
         self.feeding_state = Feeding(self)
+        self.idle_state = Idle(self)
 
         # Adding states to the brain
         self.brain.add_state(self.searching_state)
         self.brain.add_state(self.chopping_state)
         self.brain.add_state(self.delivering_state)
         self.brain.add_state(self.feeding_state)
+        self.brain.add_state(self.idle_state)
 
         self.worldSize = world.world_size
         self.TileSize = self.world.tile_size
@@ -178,7 +180,7 @@ class Delivering(State):
     def check_conditions(self):
 
         # if self.lumberjack.world.wood >= self.lumberjack.world.MAXwood:
-        #    return "IDLE"
+        #    return "Idle"
 
         if self.lumberjack.location.get_distance_to(self.lumberjack.destination) < 15:
             self.lumberjack.world.wood += 5
@@ -188,9 +190,9 @@ class Delivering(State):
         pass
 
 
-class Idling(State):
+class Idle(State):
     def __init__(self, Lumberjack):
-        State.__init__(self, "Idling")
+        State.__init__(self, "Idle")
         self.lumberjack = Lumberjack
 
     def entry_actions(self):

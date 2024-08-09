@@ -77,7 +77,8 @@ class World(object):
 
         self.lumber_yard = []
         self.barn = []
-        self.stone_storage = []
+        self.stonework = []
+        self.fish_market = []
 
         self.fields = []
         self.tile_array = [[Tile.Tile]]
@@ -315,13 +316,15 @@ class World(object):
 
         start_buildings = {"TownCenter": {"count": 1,
                                           "class": Buildings.TownCenter
-                                           },
-                           "Barn": {"count": 1
+                                          },
+                           "Barn": {"count": 0, "class": Buildings.Barn
                                     },
-                           "LumberYard": {"count": 1
-                                           },
-                           "StoneStorage": {"count": 1
-                                             }
+                           "LumberYard": {"count": 0, "class": Buildings.LumberYard
+                                          },
+                           "Stonework": {"count": 0, "class": Buildings.Stonework
+                                         },
+                           "FishMarket": {"count": 0, "class": Buildings.FishMarket
+                                          }
                            }
 
         for key in start.keys():
@@ -333,23 +336,28 @@ class World(object):
 
         for key in start_buildings.keys():
             for count in range(start_buildings[key]["count"]):
-                if key == "TownCenter":
-                    # new_building initial function call
-                    new_bldg_pos = self.get_next_building_pos(self.village_location_tile)
-                    if new_bldg_pos is not None:
-                        new_bldg = start_buildings[key]["class"](self, new_bldg_pos, key)
-                        self.add_building(new_bldg)
-                    continue
-                # temporary codes
-                if key == "LumberYard":
-                    location = copy.deepcopy(self.village_location)
-                    self.lumber_yard.append(location)
-                elif key == "Barn":
-                    location = copy.deepcopy(self.village_location)
-                    self.barn.append(location)
-                elif key == "StoneStorage":
-                    location = copy.deepcopy(self.village_location)
-                    self.stone_storage.append(location)
+                # new_building initial function call
+                new_bldg_pos = self.get_next_building_pos(self.village_location_tile)
+                if new_bldg_pos is not None:
+                    new_bldg = None
+                    location = copy.deepcopy(new_bldg_pos)
+                    new_bldg = start_buildings[key]["class"](self, location, key)
+                    self.add_building(new_bldg)
+                    # if key == "TownCenter":
+                    #     new_bldg = start_buildings[key]["class"](self, location, key)
+                    #     self.add_building(new_bldg)
+                    # # temporary codes
+                    # elif key == "LumberYard":
+                    #
+                    # elif key == "Barn":
+                    #
+                    # elif key == "StoneStorage":
+                    if new_bldg is not None:
+                        if new_bldg.can_drop_wood:
+                            self.lumber_yard.append(location)
+                        if new_bldg.can_drop_fish:
+                            self.fish_market.append(location)
+
 
     def add_entity(self, entity):
         """Maps the input entity to the entity hash table (dictionary)
@@ -381,9 +389,11 @@ class World(object):
         self.buildings[self.building_id] = building
         building.id = self.building_id
         self.building_id += 1
+        print("Building width: " + str(building.location.x))
+        print("Building height: " + str(building.location.y))
 
-        for tile_x in range(building.image.get_width()):
-            for tile_y in range(building.image.get_height()):
+        for tile_x in range(building.image.get_width() // self.tile_size):
+            for tile_y in range(building.image.get_height() // self.tile_size):
                 self.tile_array[int(building.location.y) + tile_y][int(building.location.x) + tile_x] = (
                     Tile.BuildingTile(self, "MinecraftGrass"))
         self.world_surface.blit(building.image, building.location * self.tile_size)
@@ -490,21 +500,22 @@ class World(object):
         return self.barn[0]
 
     def get_next_building_pos(self, grid_upperleft_tile: vector2.Vector2):
+        upperleft_x = int(grid_upperleft_tile.x)
+        upperleft_y = int(grid_upperleft_tile.y)
         for y in range(0, 8):
             for x in range(0, 8):
-                upperleft_x = int(grid_upperleft_tile.x)
-                upperleft_y = int(grid_upperleft_tile.y)
                 if y % 2 == 0 and x % 2 == 0:
-                    lot_tiles = [self.tile_array[upperleft_x][upperleft_y],
-                                 self.tile_array[upperleft_x + 1][upperleft_y],
-                                 self.tile_array[upperleft_x][upperleft_y + 1],
-                                 self.tile_array[upperleft_x + 1][upperleft_y + 1]]
+                    lot_tiles = [self.tile_array[upperleft_y + y][upperleft_x + x],
+                                 self.tile_array[upperleft_y + y + 1][upperleft_x + x],
+                                 self.tile_array[upperleft_y + y][upperleft_x + x + 1],
+                                 self.tile_array[upperleft_y + y + 1][upperleft_x + x + 1]]
                     lot_buildable = True
                     for tile in lot_tiles:
                         if not tile.buildable:
                             lot_buildable = False
                     if lot_buildable:
-                        return vector2.Vector2(x, y)
+                        return vector2.Vector2(upperleft_x + x, upperleft_y + y)
+        print("No suitable lot found in given grid (" + str(upperleft_x) + ", " + str(upperleft_y) + ").")
         return None
 
     def delete_entity(self, entity_to_delete: GameEntity):

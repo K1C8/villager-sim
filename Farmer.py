@@ -194,3 +194,24 @@ class FarmerSowing(aitools.StateMachine.State):
 
     def exit_actions(self):
         pass
+
+
+class FarmerIdle(aitools.StateMachine.State):
+
+    def __init__(self, farmer):
+        aitools.StateMachine.State.__init__(self, "Idle")
+        self.farmer = farmer
+
+    def entry_actions(self):
+        # BaseFunctions.random_dest(self.farmer)
+        pass
+
+    def do_actions(self):
+        pass
+
+    def check_conditions(self):
+        if self.farmer.food < HUNGER_LIMIT:
+            return "Feeding"
+
+    def exit_actions(self):
+        pass
