@@ -2,6 +2,7 @@ import copy
 import sys
 import pygame
 
+import Buildings
 from GameEntity import GameEntity
 from gametools import vector2, VoronoiMapGen, MidpointDisplacement, PertTools
 from configuration.world_configuration import DAYTIME_DURATION, NIGHTTIME_DURATION, DAY_DURATION
@@ -40,9 +41,14 @@ class World(object):
         self.clock = pygame.time.Clock()
 
         # Starting resources of new game
+        self.MAXFish = 1000
+        self.MAXCrop = 1000
+        self.MAXWood = 1000
+        self.MAXStone = 1000
         self.wood = 100
         self.fish = 100
         self.crop = 500
+        self.stone = 0
 
         # Time
         self.day = 0
@@ -305,11 +311,14 @@ class World(object):
                               "class": Explorer.Explorer}
                  }
 
-        start_buildings = {"Barn": {"count": 1
-                                    },
-                           "Lumber_Yard": {"count": 1
+        start_buildings = {"TownCenter": {"count": 1,
+                                          "class": Buildings.TownCenter
                                            },
-                           "Stone_Storage": {"count": 1
+                           "Barn": {"count": 1
+                                    },
+                           "LumberYard": {"count": 1
+                                           },
+                           "StoneStorage": {"count": 1
                                              }
                            }
 
@@ -322,16 +331,19 @@ class World(object):
 
         for key in start_buildings.keys():
             for count in range(start_buildings[key]["count"]):
-                # new_building initial function call
-                # self.add_building()
+                if key == "TownCenter":
+                    # new_building initial function call
+                    new_bldg = start_buildings[key]["class"](self, key)
+                    self.add_building()
+                    continue
                 # temporary codes
-                if key == "Lumber_Yard":
+                if key == "LumberYard":
                     location = copy.deepcopy(self.village_location)
                     self.lumber_yard.append(location)
                 elif key == "Barn":
                     location = copy.deepcopy(self.village_location)
                     self.barn.append(location)
-                elif key == "Stone_Storage":
+                elif key == "StoneStorage":
                     location = copy.deepcopy(self.village_location)
                     self.stone_storage.append(location)
 
@@ -398,7 +410,8 @@ class World(object):
                     entity.consume_func(entity)
 
         for entity in self.entities.values():
-            entity.process(delta)
+            if entity is not None:
+                entity.process(delta)
 
         # entity creation logics
         # Populate if there are enough of food for every one
@@ -481,6 +494,8 @@ class World(object):
         """
         for entity in self.entities.values():
             if entity is not None and entity == entity_to_delete:
+                # Debugging use only.
+                print("Entity:" + str(entity.id) + " has dead.")
                 self.entities[entity_to_delete.id] = None
 
         del entity_to_delete
