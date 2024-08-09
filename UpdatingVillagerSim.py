@@ -9,6 +9,7 @@ import gametools.vector2
 import TileFuncs
 import World
 import DebugTools
+from Visualize import Visualizer
 
 global DEBUG_MODE
 DEBUG_MODE = True
@@ -44,6 +45,8 @@ def run(fullscreen, world_size=64):
         screen = pygame.display.set_mode(screen_size, 0)
 
     game_world = World.World((world_size, world_size), screen_size)
+    # Add Visualizer with game_world
+    visualizer = Visualizer(game_world)
 
     pygame.display.set_caption("Villager Sim")
 
@@ -109,6 +112,8 @@ def run(fullscreen, world_size=64):
         # Clear the screen, then draw the world onto it
         screen.fill((0, 0, 0))
         game_world.render_all(screen)
+        # Render Visualizer
+        visualizer.render(screen)
 
         # Apply dark filter to screen when night time
         if not game_world.is_day:
