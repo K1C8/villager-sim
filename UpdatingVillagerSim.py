@@ -1,7 +1,9 @@
-#!python2
-
-"""This will basically be a rewrite of the original file,
-   but this time with a focus on clean code and commenting."""
+"""
+CS5150 Game AI Final Project
+Team Member: Jianyan Chen, Ruidi Huang, Xin Qi
+Aug 2024
+This is the controller of villager sim.
+"""
 
 import sys
 import pygame
@@ -15,14 +17,15 @@ global DEBUG_MODE
 DEBUG_MODE = True
 
 def run(fullscreen, world_size=64):
-    """The main function to run the program.
+    """
+    The main function to run the program.
 
-    Args:
-        fullscreen: Boolean value that determines if the program is
-            in fullscreen mode.
+    Params:
+        fullscreen: Boolean value that determines
+        if the program is in fullscreen mode.
 
-        world_size: Integer (power of 2) value that determines the
-            dimensions of the game world in terms of tiles.
+        world_size: Integer (power of 2) value that determines
+        the dimensions of the game world in terms of tiles.
 
     Returns:
         None
@@ -30,10 +33,11 @@ def run(fullscreen, world_size=64):
 
     pygame.init()
     
-    # init font
+    # init font for game and debug
     pygame.font.init()
     debug_font = pygame.font.SysFont(None, 24)
     
+    # set up screen
     screen_size = (1280, 720)
     if fullscreen:
         screen_size = pygame.display.list_modes()[0]
@@ -44,19 +48,20 @@ def run(fullscreen, world_size=64):
     else:
         screen = pygame.display.set_mode(screen_size, 0)
 
+    # set up world
     game_world = World.World((world_size, world_size), screen_size)
-    # Add Visualizer with game_world
+    # set up visualizer with game_world
     visualizer = Visualizer(game_world)
 
+    # set up caption on game window
     pygame.display.set_caption("Villager Sim")
 
     # Tick the clock once to avoid one huge tick when the game starts
     game_world.clock.tick()
 
+    # bool flag for pause and quit game
     pause = False
-
     done = False
-
     # tile_loc = None
 
     while not done:
@@ -73,17 +78,20 @@ def run(fullscreen, world_size=64):
 
             elif event.type == pygame.KEYDOWN:
 
+                # debug mode 
                 if event.key == pygame.K_F1:
                     global DEBUG_MODE
                     DEBUG_MODE = not DEBUG_MODE
                     
-                # Escape key pressed
+                # Escape key pressed, quit game
                 if event.key == pygame.K_ESCAPE:
                     done = True
 
+                # Space key pressed, pause game
                 elif event.key == pygame.K_SPACE:
                     pause = not pause
 
+                # F3 pressed, save screenshot
                 elif event.key == pygame.K_F3:
                     pygame.image.save(game_world.world_surface, "FullScreenshot.png")
 
@@ -112,8 +120,6 @@ def run(fullscreen, world_size=64):
         # Clear the screen, then draw the world onto it
         screen.fill((0, 0, 0))
         game_world.render_all(screen)
-        # Render Visualizer
-        visualizer.render(screen)
 
         # Apply dark filter to screen when night time
         if not game_world.is_day:
@@ -193,10 +199,13 @@ def run(fullscreen, world_size=64):
             # if pos is None or tile_loc is None: continue
             # elif pos is not None and tile_loc is not None:
 
+        # Render Visualizer
+        visualizer.render(screen)
         # Update the screen
         pygame.display.update()
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:

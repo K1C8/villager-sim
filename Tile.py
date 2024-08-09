@@ -20,6 +20,7 @@ class Tile(object):
 
         self.id = 0
         self.rect = pygame.Rect((0, 0), self.img.get_size())
+        self.cost = float('inf')  # Default to infinite cost if not walkable
 
     def render(self, screen):
         screen.blit(self.img, self.location)
@@ -32,6 +33,7 @@ class GrassTile(Tile):
         self.buildable = True
         self.plantable = True
         self.tillable = True
+        self.cost = 1  # Easy to walk
 
 class WaterTile(Tile):
     def __init__(self, world, tile_name):
@@ -49,12 +51,14 @@ class SmoothStoneTile(Tile):
         Tile.__init__(self, world, tile_name)
         self.walkable = True
         self.buildable = True
+        self.cost = 2
 
 class CobblestoneTile(Tile):
     def __init__(self, world, tile_name):
         Tile.__init__(self, world, tile_name)
         self.walkable = True
         self.buildable = True
+        self.cost = 5
 
 class DirtTile(Tile):
     def __init__(self, world, tile_name):
@@ -62,48 +66,58 @@ class DirtTile(Tile):
         self.walkable = True
         self.buildable = True
         self.tillable = True
+        self.cost = 3
 
 class BeachTile(Tile):
     def __init__(self, world, tile_name):
         Tile.__init__(self, world, tile_name)
         self.walkable = True
         self.buildable = True
+        self.cost = 10
 
 class Baby_Tree(Tile):
     def __init__(self, world, tile_name):
         Tile.__init__(self, world, tile_name)
         self.walkable = True
+        self.cost = 10
 
 class TreePlantedTile(Tile):
     def __init__(self, world, tile_name):
         Tile.__init__(self, world, tile_name)
         self.walkable = True
         self.Taken = False
+        self.cost = 10
 
 class SnowTile(Tile):
     def __init__(self, world, tile_name):
         Tile.__init__(self, world, tile_name)
+        self.walkable = True
+        self.cost = 10
 
 
 class BuildingTile(Tile):
     def __init__(self, world, tile_name):
         Tile.__init__(self, world, tile_name)
         self.walkable = True
+        self.cost = 5
 
 class SoilTile(Tile):
     def __init__(self, world, tile_name):
         Tile.__init__(self, world, tile_name)
         self.walkable = True
         self.crop_plantable = True
+        self.cost = 3
 
 
 class ShootFieldTile(Tile):
     def __init__(self, world, tile_name):
         Tile.__init__(self, world, tile_name)
         self.walkable = True
+        self.cost = 10
 
 
 class MatureFieldTile(Tile):
     def __init__(self, world, tile_name):
         Tile.__init__(self, world, tile_name)
         self.walkable = True
+        self.cost = 3
