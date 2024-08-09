@@ -227,25 +227,25 @@ class World(object):
         # Matrix to store GrassTiles and TreePlantedTiles in each block
         arable_tiles_matrix = [[0 for w in range(0, w_block_count)] for h in range(0, h_block_count)]
         # Skipping all 8x8 blocks on the edges of the map
-        for block_y_coordinate in range(1, h_block_count):
-            for block_x_coordinate in range(1, w_block_count):
-                # There are some twists in the logic.
-                block_upleft_tile = vector2.Vector2(block_y_coordinate * 8, block_x_coordinate * 8)
+        for block_h_coordinate in range(1, h_block_count):
+            for block_w_coordinate in range(1, w_block_count):
+                # There are some twists in the logic. Vector2 uses (x, y) coordinate; while tile_array uses [y][x]
+                block_upperleft_tile = vector2.Vector2(block_h_coordinate * 8, block_w_coordinate * 8)
                 arable_tiles = 0
                 buildable_lots = 0
 
                 # Calculate arable_tiles and buildable_lots
                 for y in range(0, 8):
                     for x in range(0, 8):
-                        tile = self.tile_array[block_x_coordinate * 8 + x][block_y_coordinate * 8 + y]
+                        tile = self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y]
                         if (isinstance(tile, Tile.GrassTile) or isinstance(tile, Tile.TreePlantedTile)
                                 or isinstance(tile, Tile.Baby_Tree)):
                             arable_tiles += 1
                         if y % 2 == 0 and x % 2 == 0:
-                            lot_tiles = [self.tile_array[block_x_coordinate * 8 + x][block_y_coordinate * 8 + y],
-                                         self.tile_array[block_x_coordinate * 8 + x + 1][block_y_coordinate * 8 + y],
-                                         self.tile_array[block_x_coordinate * 8 + x][block_y_coordinate * 8 + y + 1],
-                                         self.tile_array[block_x_coordinate * 8 + x + 1][block_y_coordinate * 8 + y]]
+                            lot_tiles = [self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y],
+                                         self.tile_array[block_w_coordinate * 8 + x + 1][block_h_coordinate * 8 + y],
+                                         self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y + 1],
+                                         self.tile_array[block_w_coordinate * 8 + x + 1][block_h_coordinate * 8 + y]]
                             lot_buildable = True
                             for tile in lot_tiles:
                                 if not tile.buildable:
@@ -253,8 +253,8 @@ class World(object):
                             if lot_buildable:
                                 buildable_lots += 1
                 if buildable_lots > 5:
-                    suitable_starting_blocks.append(block_upleft_tile)
-                arable_tiles_matrix[block_x_coordinate][block_y_coordinate] = arable_tiles
+                    suitable_starting_blocks.append(block_upperleft_tile)
+                arable_tiles_matrix[block_w_coordinate][block_h_coordinate] = arable_tiles
         print(suitable_starting_blocks)
         print(arable_tiles_matrix)
         for starting_block in suitable_starting_blocks:
@@ -333,8 +333,10 @@ class World(object):
             for count in range(start_buildings[key]["count"]):
                 if key == "TownCenter":
                     # new_building initial function call
-                    new_bldg = start_buildings[key]["class"](self, key)
-                    self.add_building()
+                    new_bldg_pos = self.get_next_building_pos(self.village_location_tile)
+                    if new_bldg_pos is not None:
+                        new_bldg = start_buildings[key]["class"](self, new_bldg_pos, key)
+                        self.add_building(new_bldg)
                     continue
                 # temporary codes
                 if key == "LumberYard":
@@ -484,6 +486,24 @@ class World(object):
 
     def get_food_court(self):
         return self.barn[0]
+
+    def get_next_building_pos(self, grid_upperleft_tile: vector2.Vector2):
+        for y in range(0, 8):
+            for x in range(0, 8):
+                upperleft_x = int(grid_upperleft_tile.x)
+                upperleft_y = int(grid_upperleft_tile.y)
+                if y % 2 == 0 and x % 2 == 0:
+                    lot_tiles = [self.tile_array[grid_upperleft_tile.x][grid_upperleft_tile.y],
+                                 self.tile_array[grid_upperleft_tile.x + 1][grid_upperleft_tile.y],
+                                 self.tile_array[grid_upperleft_tile.x][grid_upperleft_tile.y + 1],
+                                 self.tile_array[grid_upperleft_tile.x + 1][grid_upperleft_tile.y]]
+                    lot_buildable = True
+                    for tile in lot_tiles:
+                        if not tile.buildable:
+                            lot_buildable = False
+                    if lot_buildable:
+                        return vector2.Vector2(x, y)
+        return None
 
     def delete_entity(self, entity_to_delete: GameEntity):
         """
