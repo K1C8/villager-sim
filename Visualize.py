@@ -19,8 +19,7 @@ class Visualizer:
     def render(self, screen):
         for entity in self.world.entities.values():
             if isinstance(entity, Lumberjack):
-                # path = entity.goal_machine.get_predicted_path()
-                start_pos = (int(entity.location.x), int(entity.location.y))
-                end_pos = (int(entity.destination.x), int(entity.destination.y))
-                print(f"Visualizing Path from {start_pos} to {end_pos}")
+                start_pos = (int(entity.world_location.x), int(entity.world_location.y))
+                end_pos = (int(entity.destination.x + entity.world.world_position.x),
+                        int(entity.destination.y + entity.world.world_position.y))
                 self.draw_path(screen, start_pos, end_pos)
