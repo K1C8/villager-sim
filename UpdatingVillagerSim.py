@@ -12,6 +12,7 @@ import TileFuncs
 import World
 import DebugTools
 from Visualize import Visualizer
+from configuration.world_configuration import LINE_COLOR
 
 global DEBUG_MODE
 DEBUG_MODE = True
@@ -152,11 +153,11 @@ def run(fullscreen, world_size=64):
             res_crop_surface = debug_font.render(debug_res_crop_string, True, (255, 255, 255))
             res_stone_surface = debug_font.render(debug_res_stone_string, True, (255, 255, 255))
             res_entity_count_surface = debug_font.render(debug_res_entity_count, True, (255, 255, 255))
-            farmer_count_s = debug_font.render(debug_farmer_count, True, (255, 255, 255))
-            lumberjack_count_s = debug_font.render(debug_lumberjack_count, True, (255, 255, 255))
-            angler_count_s = debug_font.render(debug_angler_count, True, (255, 255, 255))
-            explorer_count_s = debug_font.render(debug_explorer_count, True, (255, 255, 255))
-            arborist_count_s = debug_font.render(debug_arborist_count, True, (255, 255, 255))
+            farmer_count_s = debug_font.render(debug_farmer_count, True, LINE_COLOR[5])
+            lumberjack_count_s = debug_font.render(debug_lumberjack_count, True, LINE_COLOR[0])
+            angler_count_s = debug_font.render(debug_angler_count, True, LINE_COLOR[1])
+            explorer_count_s = debug_font.render(debug_explorer_count, True, LINE_COLOR[4])
+            arborist_count_s = debug_font.render(debug_arborist_count, True, LINE_COLOR[2])
 
             debug_string_positions = [
                 (10, 10),
@@ -213,4 +214,4 @@ if __name__ == "__main__":
     elif len(sys.argv) >= 3:
         run(bool(int(sys.argv[1])), int(sys.argv[2]))
     else:
-        run(True, 128)
+        run(False, 128)
