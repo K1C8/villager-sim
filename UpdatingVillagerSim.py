@@ -53,6 +53,9 @@ def run(fullscreen, world_size=64):
     pause = False
 
     done = False
+
+    # tile_loc = None
+
     while not done:
 
         # Cap the game at 60 fps
@@ -88,6 +91,13 @@ def run(fullscreen, world_size=64):
                         # Toggle the entity info
                         entity[1].active_info = not entity[1].active_info
 
+                if event.button == 2:
+                    pos_on_map = gametools.vector2.Vector2(pos.x - game_world.world_position.x, pos.y - game_world.world_position.y)
+                    if pos_on_map.x >= 0 and pos_on_map.y >= 0:
+                        tile_loc = TileFuncs.get_tile_pos(game_world, pos_on_map)
+                        print("Tile clicked x:" + str(tile_loc[0]) + ", y:" + str(tile_loc[1]))
+
+
         if pygame.mouse.get_pressed()[0]:
             # check to see if the user is clicking on the minimap and update position accordingly
             game_world.check_minimap_update(pos)
@@ -108,14 +118,14 @@ def run(fullscreen, world_size=64):
             screen.blit(dark_filter, (0, 0))
 
         if DEBUG_MODE:
-        # print day string to top left corner of the screen
+            # print day string to top left corner of the screen
             debug_day_string =         "Day: " + str(game_world.day)
             debug_day_status_string =  "Status: " + ("Day" if game_world.is_day else "Night")
             debug_day_time_string =    "Time: " + str(int(game_world.time))
             debug_res_wood_string =    "Wood: " + str(game_world.wood)
             debug_res_fish_string =    "Fish: " + str(game_world.fish)
             debug_res_crop_string =    "Crop: " + str(game_world.crop)
-            debug_res_stone_string =    "Stone: " + "N/A"
+            debug_res_stone_string =   "Stone: " + "N/A"
             debug_res_entity_count =   "Entities: " + str(len(game_world.entities))
             debug_farmer_count =       "Farmers: " + str(game_world.farmer_count)
             debug_lumberjack_count =   "Lumberjacks: " + str(game_world.lumberjack_count)
@@ -151,8 +161,8 @@ def run(fullscreen, world_size=64):
                 (10, 310),
                 (10, 340),
                 (10, 370),
-            ] 
-           
+            ]
+
             surfaces = [
                 day_string_surface,
                 day_status_surface,
@@ -166,14 +176,17 @@ def run(fullscreen, world_size=64):
                 lumberjack_count_s,
                 angler_count_s,
                 explorer_count_s,
-                arborist_count_s, 
-            ] 
-           
-           # Draw rectangles and blit text surfaces
+                arborist_count_s,
+            ]
+
+            # Draw rectangles and blit text surfaces
             for pos, surface in zip(debug_string_positions, surfaces):
                 rect = surface.get_rect(topleft=pos)
                 pygame.draw.rect(screen, (0, 0, 0), rect)  # Draw black rectangle
-                screen.blit(surface, pos)  # Blit text surface 
+                screen.blit(surface, pos)  # Blit text surface
+
+            # if pos is None or tile_loc is None: continue
+            # elif pos is not None and tile_loc is not None:
 
         # Update the screen
         pygame.display.update()

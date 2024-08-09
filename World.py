@@ -221,24 +221,25 @@ class World(object):
         # Matrix to store GrassTiles and TreePlantedTiles in each block
         arable_tiles_matrix = [[0 for w in range(0, w_block_count)] for h in range(0, h_block_count)]
         # Skipping all 8x8 blocks on the edges of the map
-        for block_w_coordinate in range(1, w_block_count):
-            for block_h_coordinate in range(1, h_block_count):
-                block_upleft_tile = vector2.Vector2(block_w_coordinate * 8, block_h_coordinate * 8)
+        for block_y_coordinate in range(1, h_block_count):
+            for block_x_coordinate in range(1, w_block_count):
+                # There are some twists in the logic.
+                block_upleft_tile = vector2.Vector2(block_y_coordinate * 8, block_x_coordinate * 8)
                 arable_tiles = 0
                 buildable_lots = 0
 
                 # Calculate arable_tiles and buildable_lots
-                for x in range(0, 8):
-                    for y in range(0, 8):
-                        tile = self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y]
+                for y in range(0, 8):
+                    for x in range(0, 8):
+                        tile = self.tile_array[block_x_coordinate * 8 + x][block_y_coordinate * 8 + y]
                         if (isinstance(tile, Tile.GrassTile) or isinstance(tile, Tile.TreePlantedTile)
                                 or isinstance(tile, Tile.Baby_Tree)):
                             arable_tiles += 1
-                        if x % 2 == 0 and y % 2 == 0:
-                            lot_tiles = [self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y],
-                                         self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y + 1],
-                                         self.tile_array[block_w_coordinate * 8 + x + 1][block_h_coordinate * 8 + y],
-                                         self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y + 1]]
+                        if y % 2 == 0 and x % 2 == 0:
+                            lot_tiles = [self.tile_array[block_x_coordinate * 8 + x][block_y_coordinate * 8 + y],
+                                         self.tile_array[block_x_coordinate * 8 + x + 1][block_y_coordinate * 8 + y],
+                                         self.tile_array[block_x_coordinate * 8 + x][block_y_coordinate * 8 + y + 1],
+                                         self.tile_array[block_x_coordinate * 8 + x + 1][block_y_coordinate * 8 + y]]
                             lot_buildable = True
                             for tile in lot_tiles:
                                 if not tile.buildable:
@@ -247,7 +248,7 @@ class World(object):
                                 buildable_lots += 1
                 if buildable_lots > 5:
                     suitable_starting_blocks.append(block_upleft_tile)
-                arable_tiles_matrix[block_w_coordinate][block_h_coordinate] = arable_tiles
+                arable_tiles_matrix[block_x_coordinate][block_y_coordinate] = arable_tiles
         print(suitable_starting_blocks)
         print(arable_tiles_matrix)
         for starting_block in suitable_starting_blocks:
