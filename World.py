@@ -67,7 +67,6 @@ class World(object):
         self.explorer_count = 0
         self.arborist_count = 0
 
-
         self.lumber_yard = []
         self.barn = []
         self.stone_storage = []
@@ -254,7 +253,8 @@ class World(object):
         for starting_block in suitable_starting_blocks:
             w_block = int(starting_block.x) // 8
             h_block = int(starting_block.y) // 8
-            if w_block is not None and h_block is not None and 0 < w_block < (w_block_count - 1) and 0 < h_block < (h_block_count - 1):
+            if w_block is not None and h_block is not None and 0 < w_block < (w_block_count - 1) and 0 < h_block < (
+                    h_block_count - 1):
                 surround_arable_tiles = (arable_tiles_matrix[w_block - 1][h_block - 1] +
                                          arable_tiles_matrix[w_block][h_block - 1] +
                                          arable_tiles_matrix[w_block + 1][h_block - 1] +
@@ -307,7 +307,9 @@ class World(object):
         start_buildings = {"Barn": {"count": 1
                                     },
                            "Lumber_Yard": {"count": 1
-                                           }
+                                           },
+                           "Stone_Storage": {"count": 1
+                                             }
                            }
 
         for key in start.keys():
@@ -324,14 +326,17 @@ class World(object):
                 # temporary codes
                 if key == "Lumber_Yard":
                     location = copy.deepcopy(self.village_location)
-                    self.lumber_yard[0] = location
+                    self.lumber_yard.append(location)
                 elif key == "Barn":
                     location = copy.deepcopy(self.village_location)
-                    self.barn[0] = location
+                    self.barn.append(location)
+                elif key == "Stone_Storage":
+                    location = copy.deepcopy(self.village_location)
+                    self.stone_storage.append(location)
 
     def add_entity(self, entity):
         """Maps the input entity to the entity hash table (dictionary)
-        using the entity_id variable, then incriments entity_id.
+        using the entity_id variable, then increments entity_id.
 
         Args:
             entity: A GameEntity that will be added to the world
@@ -343,7 +348,7 @@ class World(object):
         self.entities[self.entity_id] = entity
         entity.id = self.entity_id
         self.entity_id += 1
-        
+
         if isinstance(entity, Farmer.Farmer):
             self.farmer_count += 1
         elif isinstance(entity, Lumberjack.Lumberjack):
