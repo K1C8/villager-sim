@@ -40,11 +40,13 @@ class World(object):
 
         self.clock = pygame.time.Clock()
 
-        # Starting resources of new game
+        self.MAXpopulation = 100
         self.MAXFish = 1000
         self.MAXCrop = 1000
         self.MAXWood = 1000
         self.MAXStone = 1000
+
+        # Starting resources of new game
         self.wood = 100
         self.fish = 100
         self.crop = 500
@@ -245,7 +247,7 @@ class World(object):
                             lot_tiles = [self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y],
                                          self.tile_array[block_w_coordinate * 8 + x + 1][block_h_coordinate * 8 + y],
                                          self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y + 1],
-                                         self.tile_array[block_w_coordinate * 8 + x + 1][block_h_coordinate * 8 + y]]
+                                         self.tile_array[block_w_coordinate * 8 + x +1][block_h_coordinate * 8 + y +1]]
                             lot_buildable = True
                             for tile in lot_tiles:
                                 if not tile.buildable:
@@ -382,7 +384,7 @@ class World(object):
 
         for tile_x in range(building.image.get_width()):
             for tile_y in range(building.image.get_height()):
-                self.tile_array[building.location.y + tile_y][building.location.x + tile_x] = (
+                self.tile_array[int(building.location.y) + tile_y][int(building.location.x) + tile_x] = (
                     Tile.BuildingTile(self, "MinecraftGrass"))
         self.world_surface.blit(building.image, building.location * self.tile_size)
 
@@ -493,10 +495,10 @@ class World(object):
                 upperleft_x = int(grid_upperleft_tile.x)
                 upperleft_y = int(grid_upperleft_tile.y)
                 if y % 2 == 0 and x % 2 == 0:
-                    lot_tiles = [self.tile_array[grid_upperleft_tile.x][grid_upperleft_tile.y],
-                                 self.tile_array[grid_upperleft_tile.x + 1][grid_upperleft_tile.y],
-                                 self.tile_array[grid_upperleft_tile.x][grid_upperleft_tile.y + 1],
-                                 self.tile_array[grid_upperleft_tile.x + 1][grid_upperleft_tile.y]]
+                    lot_tiles = [self.tile_array[upperleft_x][upperleft_y],
+                                 self.tile_array[upperleft_x + 1][upperleft_y],
+                                 self.tile_array[upperleft_x][upperleft_y + 1],
+                                 self.tile_array[upperleft_x + 1][upperleft_y + 1]]
                     lot_buildable = True
                     for tile in lot_tiles:
                         if not tile.buildable:

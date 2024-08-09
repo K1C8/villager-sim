@@ -17,7 +17,7 @@ class Building(GameEntity):
 
         self.cost = 100
         # Placeholder as is
-        self.image = pygame.image.load("Images/"+image_string+".png")
+        self.image = pygame.image.load("Images/Buildings/"+image_string+".png")
         
         self.can_drop_food = False
         self.can_drop_wood = False
