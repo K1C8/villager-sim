@@ -24,6 +24,7 @@ class Building(GameEntity):
         self.can_drop_crop = False
         self.can_drop_wood = False
         self.can_drop_stone = False
+        self.support = 0
 
 
 class LumberYard(Building):

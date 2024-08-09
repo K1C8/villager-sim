@@ -15,7 +15,8 @@ class Feeding(State):
         self.entity = entity
 
     def entry_actions(self):
-        self.entity.destination = self.entity.world.get_food_court()
+        print("Feeding: " + str(self.entity.id) + ".")
+        self.entity.destination = self.entity.world.get_food_court(self.entity)
 
     def do_actions(self):
         pass

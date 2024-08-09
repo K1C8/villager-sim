@@ -260,6 +260,7 @@ class World(object):
                 arable_tiles_matrix[block_w_coordinate][block_h_coordinate] = arable_tiles
         print(suitable_starting_blocks)
         print(arable_tiles_matrix)
+        # Calculate arable tiles sum of neighboring blocks of each block
         for starting_block in suitable_starting_blocks:
             w_block = int(starting_block.x) // 8
             h_block = int(starting_block.y) // 8
@@ -317,13 +318,17 @@ class World(object):
         start_buildings = {"TownCenter": {"count": 1,
                                           "class": Buildings.TownCenter
                                           },
-                           "Barn": {"count": 0, "class": Buildings.Barn
+                           "Barn": {"count": 0,
+                                    "class": Buildings.Barn
                                     },
-                           "LumberYard": {"count": 0, "class": Buildings.LumberYard
+                           "LumberYard": {"count": 0,
+                                          "class": Buildings.LumberYard
                                           },
-                           "Stonework": {"count": 0, "class": Buildings.Stonework
+                           "Stonework": {"count": 0,
+                                         "class": Buildings.Stonework
                                          },
-                           "FishMarket": {"count": 0, "class": Buildings.FishMarket
+                           "FishMarket": {"count": 0,
+                                          "class": Buildings.FishMarket
                                           }
                            }
 
@@ -354,9 +359,13 @@ class World(object):
                     # elif key == "StoneStorage":
                     if new_bldg is not None:
                         if new_bldg.can_drop_wood:
-                            self.lumber_yard.append(location)
+                            self.lumber_yard.append(location * self.tile_size)
+                        if new_bldg.can_drop_crop:
+                            self.barn.append(location * self.tile_size)
                         if new_bldg.can_drop_fish:
-                            self.fish_market.append(location)
+                            self.fish_market.append(location * self.tile_size)
+                        if new_bldg.can_drop_stone:
+                            self.stonework.append(location * self.tile_size)
 
 
     def add_entity(self, entity):
@@ -496,8 +505,37 @@ class World(object):
             y_temp_2 = self.clipper.rect_view_h * self.clipper.b
             self.world_position.y = y_temp_1 + (y_temp_2 / 2)
 
-    def get_food_court(self):
-        return self.barn[0]
+    def get_food_court(self, entity : GameEntity):
+        # food_court_candidates = []
+        # if len(self.barn) == 0 and len(self.fish_market) == 0:
+        #     return None
+        # for barn in self.barn:
+        #     food_court_candidates.append((barn, barn.get_distance_to(p=entity.location)))
+        # for market in self.fish_market:
+        #     food_court_candidates.append((market, market.get_distance_to(p=entity.location)))
+        # food_court_candidates = sorted(food_court_candidates, key=lambda fc: fc[1])
+        # if len(food_court_candidates) > 0:
+        #     return food_court_candidates[0][0]
+        if len(self.barn) > 0:
+            return self.barn[0]
+        elif len(self.fish_market) > 0:
+            return self.fish_market[0]
+
+    def get_barn(self, entity):
+        if len(self.barn) > 0:
+            return self.barn[0]
+
+    def get_stonework(self, entity):
+        if len(self.stonework) > 0:
+            return self.stonework[0]
+
+    def get_lumber_yard(self, entity):
+        if len(self.lumber_yard) > 0:
+            return self.lumber_yard[0]
+
+    def get_fish_market(self, entity):
+        if len(self.fish_market) > 0:
+            return self.fish_market[0]
 
     def get_next_building_pos(self, grid_upperleft_tile: vector2.Vector2):
         upperleft_x = int(grid_upperleft_tile.x)
