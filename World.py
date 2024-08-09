@@ -68,8 +68,9 @@ class World(object):
         self.arborist_count = 0
 
 
-        self.lumber_yard = {}
-        self.barn = {}
+        self.lumber_yard = []
+        self.barn = []
+        self.stone_storage = []
 
         self.fields = []
         self.tile_array = [[Tile.Tile]]

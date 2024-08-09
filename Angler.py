@@ -134,7 +134,7 @@ class Delivering(State):
     def entry_actions(self):
         # TODO: Make dropoff point dynamic (e.g. its own building)
 
-        self.angler.destination = Vector2(self.angler.world.w/2, self.angler.world.h/2)
+        self.angler.destination = self.angler.world.barn[0]
 
     def do_actions(self):
         pass
