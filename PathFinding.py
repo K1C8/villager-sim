@@ -33,5 +33,6 @@ def a_star_search_nx(graph, start, goal):
     start_node = (int(start.x // 32), int(start.y // 32))
     goal_node = (int(goal.x // 32), int(goal.y // 32))
     path = nx.astar_path(graph, start_node, goal_node, heuristic=heuristic, weight='weight')
+    path.pop(0)
     return [vector2.Vector2(p[0], p[1]) * 32 for p in path]
 

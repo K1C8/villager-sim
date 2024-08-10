@@ -371,12 +371,12 @@ class World(object):
                                           }
                            }
 
-        for key in start.keys():
-            for count in range(start[key]["count"]):
-                new_ent = start[key]["class"](self, key)
-                new_ent.location = copy.deepcopy(self.village_location)
-                new_ent.brain.set_state(start[key]["state"])
-                self.add_entity(new_ent)
+        # for key in start.keys():
+        #     for count in range(start[key]["count"]):
+        #         new_ent = start[key]["class"](self, key)
+        #         new_ent.location = copy.deepcopy(self.village_location)
+        #         new_ent.brain.set_state(start[key]["state"])
+        #         self.add_entity(new_ent)
 
         for key in start_buildings.keys():
             for count in range(start_buildings[key]["count"]):
@@ -398,6 +398,13 @@ class World(object):
                     # elif key == "Barn":
                     #
                     # elif key == "StoneStorage":
+
+        for key in start.keys():
+            for count in range(start[key]["count"]):
+                new_ent = start[key]["class"](self, key)
+                new_ent.location = copy.deepcopy(self.rest_places[0])
+                new_ent.brain.set_state(start[key]["state"])
+                self.add_entity(new_ent)
 
 
     def add_entity(self, entity):

@@ -4,7 +4,6 @@ from gametools.vector2 import *
 import TileFuncs
 import pygame
 from pygame.locals import *
-from PathFinding import a_star_search
 from PathFinding import a_star_search_nx, create_graph
 
 # TODO: Clean and add doctrings
@@ -47,6 +46,7 @@ class GameEntity(object):
         self.id = 0
 
         self.tp = 1.0
+        self.path = []
 
         # TODO (wazzup771@gmail.com | Nick Wayne): Not sure if these belong in the World class either
         self.info_bar = pygame.image.load("Images/Entities/info_bar.png").convert()
@@ -99,47 +99,41 @@ class GameEntity(object):
         self.world_location = self.location + self.world.world_position
 
         self.check_speed()
-        # Check if a new path needs to be calculated
-        if self.speed > 0. and self.location != self.destination:
-            if not hasattr(self, 'path') or not self.path:
-                self.path = a_star_search(self.location, self.destination, self.world)
+        # # Check if a new path needs to be calculated
+        # if self.speed > 0. and self.location != self.destination:
+        #     # if not hasattr(self, 'path') or not self.path:
+        #     if len(self.path) == 0:
+        #         self.path = a_star_search_nx(self.world.graph, self.location, self.destination)
+        #     # If the first node in the returned path has reached by the entity, pop it out.
+        #     if (len(self.path) > 0 and int(self.location.x // 32) == int(self.path[0].x)
+        #             and int(self.location.y // 32) == int(self.path[0].y)):
+        #         self.path.pop(0)
+        #     # If a path is available, follow the next step in the path
+        #     if (len(self.path) >= 1 and
+        #             TileFuncs.get_tile(self.world, self.destination) != TileFuncs.get_tile(self.world, self.location)):
+        #         next_step = self.path[0]
+        #         print("Entity ID: " + str(self.id) + ", pf start:" + str(self.location)
+        #               + ", pf end:" + str(self.destination) + ", nx_step: " + str(next_step)
+        #               + ", path: " + str(self.path))
+        #         # self.location = next_step
+        #         vec_to_destination = next_step - self.location
+        #     else:
+        #         print("Entity ID: " + str(self.id) + ", pf start:" + str(self.location)
+        #               + ", pf end:" + str(self.destination) + ", no path given." + str(len(self.path)))
+        #         vec_to_destination = self.destination - self.location
+        #     distance_to_destination = vec_to_destination.get_length()
+        #     heading = vec_to_destination.get_normalized()
+        #     travel_distance = min(distance_to_destination, self.speed)
+        #     self.location += travel_distance * heading * self.speed
 
-        # If a path is available, follow the next step in the path
-        if self.path:
-            next_step = self.path.pop(0)
-            self.location = next_step
 
-        # If no path is available or it's empty, default to straight-line walking
-        elif self.speed > 0. and self.location != self.destination:
-            vec_to_destination = self.destination - self.location
-            distance_to_destination = vec_to_destination.get_length()
-            heading = vec_to_destination.get_normalized()
-            travel_distance = min(distance_to_destination, self.speed * time_passed)  # Use time_passed to adjust for frame rate
-            self.location += travel_distance * heading
-        if self.speed > 0. and self.location != self.destination:
-            if not hasattr(self, 'path') or not self.path:
-                # graph = create_graph(self.world)
-                # print(self.location)
-                self.path = a_star_search_nx(self.world.graph, self.location, self.destination)
-            if self.path:
-                print(self.path)
-                next_step = self.path.pop(0)
-                self.location = next_step
-            else:
-                vec_to_destination = self.destination - self.location
-                distance_to_destination = vec_to_destination.get_length()
-                heading = vec_to_destination.get_normalized()
-                travel_distance = min(distance_to_destination, self.speed)
-                self.location += travel_distance * heading * self.speed
-
-        """
         if self.speed > 0. and self.location != self.destination:
             vec_to_destination = self.destination - self.location
             distance_to_destination = vec_to_destination.get_length()
             heading = vec_to_destination.get_normalized()
             travel_distance = min(distance_to_destination, self.speed)
             self.location += travel_distance * heading * self.speed
-        """
+
 
         self.tile_location_x = int(self.location.x/self.world.tile_size)
         self.tile_location_y = int(self.location.y/self.world.tile_size)
