@@ -10,10 +10,12 @@ DEBUG = False
 
 def random_dest(entity, recurse=False, r_num=0, r_max=6):
     # Function for going to a random destination
+    if entity.orientation == 0:
+        entity.orientation = random.randint(-180, 170)
     if recurse:
         entity.orientation += 30
     else:
-        entity.orientation += random.randint(-30, 30)
+        entity.orientation += random.randint(-20, 30)
     angle = math.radians(entity.orientation)
     distance = random.randint(50, 100)
     possible_dest = Vector2(entity.location.x + math.cos(angle) * distance,
@@ -26,6 +28,7 @@ def random_dest(entity, recurse=False, r_num=0, r_max=6):
         if home_distance > max_distance:
             print("Entity id " + str(entity.id) + " has reached too far away.")
             possible_dest = nearest_food_court
+            entity.orientation *= -1
 
     # If the destination will go off the map, it is NOT a valid move under any circumstances.
     bad_spot = False
@@ -68,18 +71,5 @@ def get_idle_destination(entity):
     if len(rest_candidates) > 0:
         return rest_candidates[0][0]
 
-
-# def apply_to_sow(entity):
-#     world = entity.world
-#     if len(world.fields_waiting_to_sow) < 1:
-#         return None
-#
-#     sow_candidates = []
-#     for field in sow_candidates:
-#         sow_candidates.append((field, field.get_distance_to(p=entity.location)))
-#     sow_candidates = sorted(sow_candidates, key=lambda f: f[1])
-#     if len(sow_candidates) > 0:
-#         world.fields_waiting_to_sow.remove(sow_candidates[0])
-#         return sow_candidates[0][0]
 
 

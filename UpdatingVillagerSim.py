@@ -130,9 +130,6 @@ def run(fullscreen, world_size=64):
             screen.blit(dark_filter, (0, 0))
 
         if DEBUG_MODE:
-            living_entities_count = (game_world.angler_count + game_world.arborist_count + game_world.builder_count
-                                     + game_world.explorer_count + game_world.farmer_count
-                                     + game_world.lumberjack_count)
             # print day string to top left corner of the screen
             debug_day_string =         "Day: " + str(game_world.day)
             debug_day_status_string =  "Status: " + ("Day" if game_world.is_day else "Night")
@@ -141,7 +138,7 @@ def run(fullscreen, world_size=64):
             debug_res_fish_string =    "Fish: " + str(game_world.fish)
             debug_res_crop_string =    "Crop: " + str(game_world.crop)
             debug_res_stone_string =   "Stone: " + str(game_world.stone)
-            debug_res_entity_count =   "Entities: " + str(living_entities_count)
+            debug_res_entity_count =   "Entities: " + str(game_world.living_entities_count)
             debug_farmer_count =       "Farmers: " + str(game_world.farmer_count)
             debug_lumberjack_count =   "Lumberjacks: " + str(game_world.lumberjack_count)
             debug_angler_count =       "Anglers: " + str(game_world.angler_count)

@@ -1,1 +1,1 @@
-__all__ = ['GoalMachine', 'StateMachine']
+__all__ = ['GoalMachine', 'StateMachine', 'BuildingDecision']

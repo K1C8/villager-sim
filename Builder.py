@@ -23,6 +23,9 @@ class Builder(GameEntity):
         self.primary_state = "Builder_Idle"
         self.hunger_limit = 60
 
+        # Building speed of Builders
+        self.tp = 0.05
+
         self.building_state = Builder_Building(self)
         self.idle_state = Idle(self)
         self.Finding_state = Builder_Finding(self)
@@ -45,7 +48,7 @@ class Builder_Building(State):
         if self.building_complete >= 5.0:
             self.Builder.target.create()
 
-            self.Builder.world.BuildingQueue.remove(self.Builder.target)
+            # self.Builder.world.BuildingQueue.remove(self.Builder.target)
             return "Finding"
 
     def do_actions(self):
@@ -58,7 +61,7 @@ class Builder_Building(State):
 
 class Builder_Finding(State):  # Finding a suitable place to build.
     """If:
-    Lumber Yard - In the woods not near anything else
+    Lumberyard - In the woods not near anything else
     Docks - Edge of the water, decently distanced from others
     House - Somewhere in the town area
     Manor - near top of the map or maybe replaces a house.
@@ -69,7 +72,7 @@ class Builder_Finding(State):  # Finding a suitable place to build.
         self.Builder = Builder
 
     def check_conditions(self):
-        if len(self.Builder.world.BuildingQueue) == 0:
+        if self.Builder.target is None:
             return "Idle"
 
         if self.Builder.location.get_distance_to(self.Builder.destination) < 2:
@@ -80,8 +83,17 @@ class Builder_Finding(State):  # Finding a suitable place to build.
 
     def entry_actions(self):
         try:
-            self.Builder.destination = self.Builder.world.BuildingQueue[0].location.copy()
-            self.Builder.target = self.Builder.world.BuildingQueue[0]
+            self.Builder.target = None
+            self.Builder.target = self.Builder.world.BuildingQueue.get()
+            if self.Builder.target is None:
+                return
+            if (self.Builder.world.wood >= self.Builder.target["class"].COST_WOOD and
+                    self.Builder.world.stone >= self.Builder.target["class"].COST_STONE):
+                self.Builder.destination = self.Builder.target["location"].copy()
+                self.Builder.building_class = self.Builder.target["class"]
+            else:
+                self.Builder.world.BuildingQueue.put(self.Builder.target)
+                self.Builder.target = None
 
         except IndexError:
             pass

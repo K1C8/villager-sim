@@ -148,9 +148,9 @@ class FarmerTilling(aitools.StateMachine.State):
 
                 self.farmer.hit = 0
 
-                print("Farmer id " + str(self.farmer.id) + " has tilled a tile, finding next tile from (" +
-                      str(self.farmer.location.x / self.farmer.world.tile_size) + ", " +
-                      str(self.farmer.location.y / self.farmer.world.tile_size) + ").")
+                # print("Farmer id " + str(self.farmer.id) + " has tilled a tile, finding next tile from (" +
+                #       str(self.farmer.location.x / self.farmer.world.tile_size) + ", " +
+                #       str(self.farmer.location.y / self.farmer.world.tile_size) + ").")
 
                 # Find a nearby tillable tile
                 nearby_array = TileFuncs.get_vnn_array(self.farmer.world, self.farmer.location, self.farmer.view_range)
@@ -158,9 +158,9 @@ class FarmerTilling(aitools.StateMachine.State):
                     test_tile = TileFuncs.get_tile(self.farmer.world, location)
                     if test_tile.name == "MinecraftGrass":
                         self.farmer.destination = location
-                        print("Farmer id " + str(self.farmer.id) + " has found a new tile to till, next tile is (" +
-                              str(location.x / self.farmer.world.tile_size) + ", " +
-                              str(location.y / self.farmer.world.tile_size) + ").")
+                        # print("Farmer id " + str(self.farmer.id) + " has found a new tile to till, next tile is (" +
+                        #       str(location.x / self.farmer.world.tile_size) + ", " +
+                        #       str(location.y / self.farmer.world.tile_size) + ").")
                         return
 
                 return self.farmer.primary_state
@@ -202,10 +202,21 @@ class FarmerSearching(aitools.StateMachine.State):
 
     def check_conditions(self):
 
+        if (len(self.farmer.harvest_list) > 0 or
+                (self.farmer.world.harvest_queue is not None and not self.farmer.world.harvest_queue.empty())):
+            if len(self.farmer.harvest_list) > 0:
+                self.farmer.destination = self.farmer.harvest_list[0].location
+                print("Farmer id " + str(self.farmer.id) + " harvest list: " + str(len(self.farmer.harvest_list))
+                      + ", first of the harvest list is " + str(self.farmer.harvest_list[0].location))
+            else:
+                harvest_tile = self.farmer.world.harvest_queue.get()
+                self.farmer.harvest_list.append(harvest_tile)
+                self.farmer.destination = harvest_tile.location
+            return "Harvesting"
+
         # Check if farmers can till more tiles and if the current tile can till, or find the next place to till
-        if (len(self.farmer.sow_list) == 0 and len(self.farmer.water_list) == 0 and len(self.farmer.harvest_list) == 0
-                and self.farmer.world.harvest_queue.empty()
-                and self.farmer.world.farmer_count * TILES_PER_FARMER > len(self.farmer.world.fields)):
+        elif (len(self.farmer.sow_list) == 0 and len(self.farmer.water_list) == 0
+              and self.farmer.world.farmer_count * TILES_PER_FARMER > len(self.farmer.world.fields)):
             if self.farmer.location.get_distance_to(self.farmer.destination) < 15:
                 location_array = TileFuncs.get_vnn_array(self.farmer.world, self.farmer.location,
                                                          self.farmer.view_range)
@@ -228,7 +239,7 @@ class FarmerSearching(aitools.StateMachine.State):
               (self.farmer.world.sow_queue is not None and not self.farmer.world.sow_queue.empty())):
             if len(self.farmer.sow_list) > 0:
                 print("Farmer id " + str(self.farmer.id) + " sow list: " + str(len(self.farmer.sow_list))
-                      + ", first of the sow list is " + str(self.farmer.sow_list[0]))
+                      + ", first of the sow list is " + str(self.farmer.sow_list[0].location))
                 self.farmer.destination = self.farmer.sow_list[0].location
             else:
                 sow_tile = self.farmer.world.sow_queue.get()
@@ -240,23 +251,12 @@ class FarmerSearching(aitools.StateMachine.State):
             if len(self.farmer.water_list) > 0:
                 self.farmer.destination = self.farmer.water_list[0].location
                 print("Farmer id " + str(self.farmer.id) + " water list: " + str(len(self.farmer.water_list))
-                      + ", first of the water list is " + str(self.farmer.water_list[0]))
+                      + ", first of the water list is " + str(self.farmer.water_list[0].location))
             else:
                 water_tile = self.farmer.world.water_queue.get()
                 self.farmer.water_list.append(water_tile)
                 self.farmer.destination = water_tile.location
             return "Watering"
-        elif (len(self.farmer.harvest_list) > 0 or
-              self.farmer.world.harvest_queue is not None and not self.farmer.world.harvest_queue.empty()):
-            if len(self.farmer.harvest_list) > 0:
-                self.farmer.destination = self.farmer.harvest_list[0].location
-                print("Farmer id " + str(self.farmer.id) + " harvest list: " + str(len(self.farmer.harvest_list))
-                      + ", first of the harvest list is " + str(self.farmer.harvest_list[0]))
-            else:
-                harvest_tile = self.farmer.world.harvest_queue.get()
-                self.farmer.harvest_list.append(harvest_tile)
-                self.farmer.destination = harvest_tile.location
-            return "Harvesting"
 
         elif self.farmer.world.farmer_count * TILES_PER_FARMER <= len(self.farmer.world.fields):
             return "Idle"
@@ -387,7 +387,8 @@ class FarmerWatering(aitools.StateMachine.State):
                     new_tile.rect.topleft = new_tile.location
                     # new_tile.color = check.color # TODO: Figure out what this does.
 
-                    self.farmer.world.tile_array[int(new_tile.location.y / 32)][int(new_tile.location.x / 32)] = new_tile
+                    self.farmer.world.tile_array[int(new_tile.location.y / 32)][
+                        int(new_tile.location.x / 32)] = new_tile
                     self.farmer.world.world_surface.blit(new_tile.img, new_tile.location)
                     self.farmer.world.world_surface.blit(shade, new_tile.location)
                     # self.farmer.world.fields.append(new_tile)
@@ -402,7 +403,6 @@ class FarmerWatering(aitools.StateMachine.State):
                 self.farmer.hit = 0
 
                 return self.farmer.primary_state
-
 
         if self.farmer.food < self.farmer.hunger_limit:
             return "Feeding"
@@ -460,7 +460,9 @@ class FarmerHarvesting(aitools.StateMachine.State):
                 # self.farmer.world.world_surface.blit(darkness, new_tile.location)
                 self.farmer.world.world_surface.blit(shade, new_tile.location)
                 self.farmer.world.sow_queue.put(new_tile)
-
+                self.farmer.harvest_list.remove(check)
+                print("Farmer id " + str(self.farmer.id) + " have " + str(len(self.farmer.harvest_list)) +
+                      " tiles to harvest.")
                 # TODO: Update the minimap
 
                 self.farmer.hit = 0
@@ -502,4 +504,3 @@ class Delivering(State):
 
     def exit_actions(self):
         pass
-

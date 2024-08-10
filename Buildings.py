@@ -1,5 +1,6 @@
 from aitools.StateMachine import *
 from GameEntity import GameEntity
+from configuration.world_configuration import WORLD_TILE_SIZE
 from gametools.vector2 import Vector2
 import glob
 
@@ -28,6 +29,11 @@ class Building(GameEntity):
 
 
 class LumberYard(Building):
+    SIZE_X = 2
+    SIZE_Y = 2
+    COST_STONE = 50
+    COST_WOOD = 150
+
     def __init__(self, world, pos_tile: Vector2, image_string="LumberYard"):
         Building.__init__(self, world, "Lumber Yard", pos_tile, image_string)
 
@@ -41,6 +47,10 @@ class LumberYard(Building):
 
 
 class Dock(Building):
+    SIZE_X = 2
+    SIZE_Y = 2
+    COST_STONE = 100
+    COST_WOOD = 150
     
     def __init__(self, world, pos_tile: Vector2, image_string="Dock"):
         Building.__init__(self, world, "Dock", pos_tile, image_string)
@@ -57,30 +67,45 @@ class Dock(Building):
 
 
 class House(Building):
+    SIZE_X = 1
+    SIZE_Y = 1
+    COST_STONE = 5
+    COST_WOOD = 45
+
     def __init__(self, world, pos_tile: Vector2, image_string="House"):
         Building.__init__(self, world, "House", pos_tile, image_string)
 
         self.supports = 5
-        self.cost_wood = 45
-        self.cost_stone = 5
+        # self.cost_wood = 45
+        # self.cost_stone = 5
 
         self.world.MAXpopulation += self.supports
 
 
 class Manor(Building):
+    SIZE_X = 2
+    SIZE_Y = 2
+    COST_STONE = 100
+    COST_WOOD = 50
+
     def __init__(self, world, pos_tile: Vector2, image_string="Manor"):
         Building.__init__(self, world, "Manor", pos_tile, image_string)
 
         self.image = self.image_funcs.get_irregular_image(2, 2, 2, 4)
 
         self.supports = 10
-        self.cost_stone = 100
-        self.cost_wood = 50
+        # self.cost_stone = 100
+        # self.cost_wood = 50
 
         self.world.MAXpopulation += self.supports
 
 
 class TownCenter(Building):
+    SIZE_X = 2
+    SIZE_Y = 2
+    COST_STONE = 200
+    COST_WOOD = 200
+
     def __init__(self, world, pos_tile: Vector2, image_string="TownCenter"):
         print("Pos_tile at TownCenter.__init__ is " + str(pos_tile))
         Building.__init__(self, world, "TownCenter", pos_tile, image_string)
@@ -93,19 +118,22 @@ class TownCenter(Building):
         self.can_drop_wood = True
         self.can_drop_stone = True
         
-        self.supports = 10
+        self.supports = 5
         self.cost = 500
-        self.cost_wood = 200
-        self.cost_stone = 200
+        # self.cost_wood = 200
+        # self.cost_stone = 200
 
         self.world.MAXpopulation += self.supports
-        self.world.MAXWood += 500
-        self.world.MAXFish += 500
-        self.world.MAXCrop += 500
-        self.world.MAXStone += 500
+        self.world.MAXWood += 100
+        self.world.MAXFish += 100
+        self.world.MAXCrop += 100
+        self.world.MAXStone += 100
 
 
-class UnderConstruction(Building):
+class UnderConstruction2x2(Building):
+    SIZE_X = 2
+    SIZE_Y = 2
+
     def __init__(self, world, pos_tile: Vector2, image_string, will_be):
         Building.__init__(self, world, "Under Construction", pos_tile, image_string)
         self.will_be = will_be
@@ -124,42 +152,57 @@ class StoreShed(Building):
 
 
 class Barn(Building):
+    SIZE_X = 2
+    SIZE_Y = 2
+    COST_STONE = 100
+    COST_WOOD = 50
+
     def __init__(self, world, pos_tile: Vector2, image_string="Barn"):
         Building.__init__(self, world, "Barn", pos_tile, image_string)
 
         self.image = self.image_funcs.get_irregular_image(2, 2, 2, 2)
         self.Held = 0
         self.HeldMax = 500
-        self.cost_stone = 100
-        self.cost_wood = 50
+        # self.cost_stone = 100
+        # self.cost_wood = 50
 
         self.world.MAXwood += self.HeldMax
         self.can_drop_crop = True
 
 
 class Stonework(Building):
+    SIZE_X = 2
+    SIZE_Y = 2
+    COST_STONE = 150
+    COST_WOOD = 50
+
     def __init__(self, world, pos_tile: Vector2, image_string="Stonework"):
         Building.__init__(self, world, "Stonework", pos_tile, image_string)
 
         self.image = self.image_funcs.get_irregular_image(2, 2, 2, 2)
         self.Held = 0
         self.HeldMax = 500
-        self.cost_stone = 150
-        self.cost_wood = 50
+        # self.cost_stone = 150
+        # self.cost_wood = 50
 
         self.world.MAXstone += self.HeldMax
         self.can_drop_stone = True
 
 
 class FishMarket(Building):
+    SIZE_X = 2
+    SIZE_Y = 2
+    COST_STONE = 50
+    COST_WOOD = 150
+
     def __init__(self, world, pos_tile: Vector2, image_string="FishMarket"):
         Building.__init__(self, world, "FishMarket", pos_tile, image_string)
 
         self.image = self.image_funcs.get_irregular_image(2, 2, 2, 2)
         self.Held = 0
         self.HeldMax = 500
-        self.cost_wood = 150
-        self.cost_stone = 50
+        # self.cost_wood = 150
+        # self.cost_stone = 50
 
         self.world.MAXstone += self.HeldMax
         self.can_drop_fish = True

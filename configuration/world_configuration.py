@@ -6,8 +6,14 @@ DAY_DURATION = DAYTIME_DURATION + NIGHTTIME_DURATION
 # Configuration of maximum managed tiles for each farmer
 TILES_PER_FARMER = 20
 
+# Size of tile
+WORLD_TILE_SIZE = 32
+
 # FPS Target
 FPS = 60
+
+# Utilize upper limit for buildings
+UTILIZE_LIMIT = 0.9
 
 # Configuration for colors
 LINE_COLOR = [(255, 0, 0), # Red - Lumberjack

@@ -4,8 +4,9 @@ import pygame
 
 import Buildings
 from GameEntity import GameEntity
+from aitools.BuildingDecision import building_decision
 from gametools import vector2, VoronoiMapGen, MidpointDisplacement, PertTools
-from configuration.world_configuration import DAYTIME_DURATION, NIGHTTIME_DURATION, DAY_DURATION
+from configuration.world_configuration import DAYTIME_DURATION, NIGHTTIME_DURATION, DAY_DURATION, UTILIZE_LIMIT
 import math
 import Tile
 import Clips
@@ -41,11 +42,11 @@ class World(object):
 
         self.clock = pygame.time.Clock()
 
-        self.MAXpopulation = 100
-        self.MAXFish = 1000
-        self.MAXCrop = 1000
-        self.MAXWood = 1000
-        self.MAXStone = 1000
+        self.MAXpopulation = 8
+        self.MAXFish = 500
+        self.MAXCrop = 500
+        self.MAXWood = 500
+        self.MAXStone = 500
 
         # Starting resources of new game
         self.wood = 100
@@ -70,6 +71,7 @@ class World(object):
         self.entity_id = 0
         self.building_id = 0
 
+        self.living_entities_count = 0
         self.farmer_count = 0
         self.lumberjack_count = 0
         self.angler_count = 0
@@ -345,7 +347,10 @@ class World(object):
 
                  "Explorer": {"count": 1,
                               "state": "SearchStone",
-                              "class": Explorer.Explorer}
+                              "class": Explorer.Explorer},
+                 "Builder": {"count": 0,
+                             "state": "Idle",
+                             "class": Builder.Builder}
                  }
 
         start_buildings = {"TownCenter": {"count": 1,
@@ -375,7 +380,9 @@ class World(object):
         for key in start_buildings.keys():
             for count in range(start_buildings[key]["count"]):
                 # new_building initial function call
-                new_bldg_pos = self.get_next_building_pos(self.village_location_tile)
+                new_bldg_pos = self.get_next_building_pos(self.village_location_tile,
+                                                          start_buildings[key]["class"].SIZE_X,
+                                                          start_buildings[key]["class"].SIZE_Y)
                 if new_bldg_pos is not None:
                     new_bldg = None
                     location = copy.deepcopy(new_bldg_pos)
@@ -406,6 +413,7 @@ class World(object):
         self.entities[self.entity_id] = entity
         entity.id = self.entity_id
         self.entity_id += 1
+        self.living_entities_count += 1
 
         if isinstance(entity, Farmer.Farmer):
             self.farmer_count += 1
@@ -485,6 +493,12 @@ class World(object):
             self.crop -= 100
             self.fish -= 100
             print("Farmer created")
+
+        next_building = building_decision(self)
+        if next_building is not None:
+
+            self.BuildingQueue.put(next_building)
+
 
     def render(self, surface):
         """Blits the world_surface and all entities onto surface.
@@ -576,12 +590,12 @@ class World(object):
         if len(self.fish_market) > 0:
             return self.fish_market[0]
 
-    def get_next_building_pos(self, grid_upperleft_tile: vector2.Vector2):
+    def get_next_building_pos(self, grid_upperleft_tile: vector2.Vector2, size_x, size_y):
         upperleft_x = int(grid_upperleft_tile.x)
         upperleft_y = int(grid_upperleft_tile.y)
         for y in range(0, 8):
             for x in range(0, 8):
-                if y % 2 == 0 and x % 2 == 0:
+                if y % size_y == 0 and x % size_x == 0:
                     lot_tiles = [self.tile_array[upperleft_y + y][upperleft_x + x],
                                  self.tile_array[upperleft_y + y + 1][upperleft_x + x],
                                  self.tile_array[upperleft_y + y][upperleft_x + x + 1],
@@ -607,6 +621,7 @@ class World(object):
                 # Debugging use only.
                 print("Entity:" + str(entity.id) + " has dead.")
                 self.entities[entity_to_delete.id] = None
+                self.living_entities_count -= 1
                 match entity:
                     case Angler.Angler():
                         self.angler_count -= 1
