@@ -2,45 +2,36 @@ import heapq
 import TileFuncs
 import Tile
 from gametools import vector2
+import networkx as nx
+
+def create_graph(world):
+    G = nx.Graph()
+    print("create graph")
+    for x in range(world.w // 32):
+        for y in range(world.h // 32):
+            node = (x, y)
+            print("start with node: ", node)
+            node_vec = vector2.Vector2(x, y) * 32
+            tile = TileFuncs.get_tile(world, node_vec)
+            if tile:
+                G.add_node(node)
+                for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]:  # 8-directions
+                    neighbor = (x + dx, y + dy)
+                    neighbor_vec = vector2.Vector2(x + dx, y + dy) * 32
+                    neighbor_tile = TileFuncs.get_tile(world, neighbor_vec)
+                    if neighbor_tile:
+                        G.add_edge(node, neighbor, weight=neighbor_tile.cost)
+    return G
+
 
 def heuristic(a, b):
-    return abs(b.x - a.x) + abs(b.y - a.y)  # Manhattan distance heuristic
+    (x1, y1) = a
+    (x2, y2) = b
+    return abs(x1 - x2) + abs(y1 - y2)  # Manhattan distance
 
-def a_star_search(start, goal, world):
-    start_key = (start.x, start.y)
-    goal_key = (goal.x, goal.y)
+def a_star_search_nx(graph, start, goal):
+    start_node = (int(start.x // 32), int(start.y // 32))
+    goal_node = (int(goal.x // 32), int(goal.y // 32))
+    path = nx.astar_path(graph, start_node, goal_node, heuristic=heuristic, weight='weight')
+    return [vector2.Vector2(p[0], p[1]) * 32 for p in path]
 
-    open_heap = []
-    heapq.heappush(open_heap, (0, start_key))
-    came_from = {start_key: None}
-    cost_so_far = {start_key: 0}
-
-    while len(open_heap) > 0:
-        current_key = heapq.heappop(open_heap)[1]
-
-        if current_key == goal_key:
-            return reconstruct_path(came_from, start_key, goal_key)
-
-        current = Vector2(current_key[0], current_key[1])  # Convert back to Vector2 for neighbor calculations
-        print(f"Current Node: {current_key}, Cost So Far: {cost_so_far[current_key]}")
-        for next in TileFuncs.get_tile_neighbours(world, current):
-            print(f"Checking neighbor: {next}")
-            next_key = (int(next.x), int(next.y))
-            new_cost = cost_so_far[current_key] + TileFuncs.get_tile(world, next).cost
-            print(f"Neighbor {next_key} with new cost {new_cost}")
-            if next_key not in cost_so_far or new_cost < cost_so_far[next_key]:
-                cost_so_far[next_key] = new_cost
-                priority = new_cost + heuristic(goal, next)
-                heapq.heappush(open_heap, (priority, next_key))
-                came_from[next_key] = current_key
-
-    return []
-
-def reconstruct_path(came_from, start, goal):
-    current_key = goal
-    path = []
-    while current_key != start:
-        path.append(Vector2(current_key[0], current_key[1]))  # Convert keys back to Vector2
-        current_key = came_from[current_key]
-    path.reverse()
-    return path

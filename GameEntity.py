@@ -116,6 +116,22 @@ class GameEntity(object):
             heading = vec_to_destination.get_normalized()
             travel_distance = min(distance_to_destination, self.speed * time_passed)  # Use time_passed to adjust for frame rate
             self.location += travel_distance * heading
+        if self.speed > 0. and self.location != self.destination:
+            if not hasattr(self, 'path') or not self.path:
+                # graph = create_graph(self.world)
+                # print(self.location)
+                self.path = a_star_search_nx(self.world.graph, self.location, self.destination)
+            if self.path:
+                print(self.path)
+                next_step = self.path.pop(0)
+                self.location = next_step
+            else:
+                vec_to_destination = self.destination - self.location
+                distance_to_destination = vec_to_destination.get_length()
+                heading = vec_to_destination.get_normalized()
+                travel_distance = min(distance_to_destination, self.speed)
+                self.location += travel_distance * heading * self.speed
+
         """
         if self.speed > 0. and self.location != self.destination:
             vec_to_destination = self.destination - self.location
