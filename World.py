@@ -313,7 +313,7 @@ class World(object):
                             "class": Farmer.Farmer},
 
                  "Explorer": {"count": 1,
-                              "state": "Exploring",
+                              "state": "SearchStone",
                               "class": Explorer.Explorer}
                  }
 

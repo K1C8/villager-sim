@@ -27,6 +27,8 @@ class GameEntity(object):
         self.location = Vector2(0, 0)
         self.world_location = Vector2(0, 0)
         self.destination = Vector2(0, 0)
+        self.tile_location_x = int(self.location.x/self.world.tile_size)
+        self.tile_location_y = int(self.location.y/self.world.tile_size)
         
         self.speed = 0.
 
@@ -96,7 +98,6 @@ class GameEntity(object):
         self.brain.think()
         self.world_location = self.location + self.world.world_position
 
-
         self.check_speed()
 
         if self.speed > 0. and self.location != self.destination:
@@ -105,6 +106,9 @@ class GameEntity(object):
             heading = vec_to_destination.get_normalized()
             travel_distance = min(distance_to_destination, self.speed)
             self.location += travel_distance * heading * self.speed
+        
+        self.tile_location_x = int(self.location.x/self.world.tile_size)
+        self.tile_location_y = int(self.location.y/self.world.tile_size)
 
     def death(self):
         self.world.delete_entity(self)
