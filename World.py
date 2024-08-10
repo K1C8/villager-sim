@@ -16,7 +16,7 @@ import Lumberjack
 import Angler
 import Explorer
 import Arborist
-
+from PathFinding import create_graph
 
 class World(object):
     """This class holds everything in the game. It also
@@ -110,6 +110,7 @@ class World(object):
                 has_found_starting_point = True
                 self.village_location = vector2.Vector2(starting_point.x * 32, starting_point.y * 32)
                 self.village_location_tile = copy.deepcopy(starting_point)
+        self.graph = create_graph(self)
 
         self.populate()
         self.clipper = Clips.Clips(self, screen_size)

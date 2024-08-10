@@ -1,7 +1,7 @@
 import heapq
 import TileFuncs
 import Tile
-from gametools.vector2 import Vector2
+from gametools import vector2
 
 def heuristic(a, b):
     return abs(b.x - a.x) + abs(b.y - a.y)  # Manhattan distance heuristic

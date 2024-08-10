@@ -5,6 +5,7 @@ import TileFuncs
 import pygame
 from pygame.locals import *
 from PathFinding import a_star_search
+from PathFinding import a_star_search_nx, create_graph
 
 # TODO: Clean and add doctrings
 
