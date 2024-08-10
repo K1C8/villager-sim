@@ -1,6 +1,7 @@
 from gametools import vector2
 import Tile
 import math
+from gametools.vector2 import Vector2
 
 
 def get_tile(world, location):
@@ -9,6 +10,25 @@ def get_tile(world, location):
         return world.tile_array[int(tile.y)][int(tile.x)]
     except IndexError:
         return Tile.Tile(world, "Sand")
+
+def get_tile_neighbours(world, location):
+    directions = [
+        Vector2(1, 0),  # East
+        Vector2(-1, 0), # West
+        Vector2(0, 1),  # South
+        Vector2(0, -1), # North
+        Vector2(1, 1),  # Southeast
+        Vector2(1, -1), # Northeast
+        Vector2(-1, 1), # Southwest
+        Vector2(-1, -1) # Northwest
+        ]
+    neighbors = []
+    for direction in directions:
+        neighbor_location = location + direction
+        tile = get_tile(world, neighbor_location)
+        if tile:
+            neighbors.append(neighbor_location)
+    return neighbors
 
 def get_tile_pos(world, location):
     return vector2.Vector2(int(location.x) >> 5, int(location.y) >> 5)

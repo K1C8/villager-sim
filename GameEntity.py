@@ -1,11 +1,10 @@
-import asyncio
-
 from World import *
 from aitools.StateMachine import *
 from gametools.vector2 import *
 import TileFuncs
 import pygame
 from pygame.locals import *
+from PathFinding import a_star_search
 
 # TODO: Clean and add doctrings
 
@@ -29,7 +28,7 @@ class GameEntity(object):
         self.destination = Vector2(0, 0)
         self.tile_location_x = int(self.location.x/self.world.tile_size)
         self.tile_location_y = int(self.location.y/self.world.tile_size)
-        
+
         self.speed = 0.
 
         self.land_based = True
@@ -99,14 +98,32 @@ class GameEntity(object):
         self.world_location = self.location + self.world.world_position
 
         self.check_speed()
+        # Check if a new path needs to be calculated
+        if self.speed > 0. and self.location != self.destination:
+            if not hasattr(self, 'path') or not self.path:
+                self.path = a_star_search(self.location, self.destination, self.world)
 
+        # If a path is available, follow the next step in the path
+        if self.path:
+            next_step = self.path.pop(0)
+            self.location = next_step
+
+        # If no path is available or it's empty, default to straight-line walking
+        elif self.speed > 0. and self.location != self.destination:
+            vec_to_destination = self.destination - self.location
+            distance_to_destination = vec_to_destination.get_length()
+            heading = vec_to_destination.get_normalized()
+            travel_distance = min(distance_to_destination, self.speed * time_passed)  # Use time_passed to adjust for frame rate
+            self.location += travel_distance * heading
+        """
         if self.speed > 0. and self.location != self.destination:
             vec_to_destination = self.destination - self.location
             distance_to_destination = vec_to_destination.get_length()
             heading = vec_to_destination.get_normalized()
             travel_distance = min(distance_to_destination, self.speed)
             self.location += travel_distance * heading * self.speed
-        
+        """
+
         self.tile_location_x = int(self.location.x/self.world.tile_size)
         self.tile_location_y = int(self.location.y/self.world.tile_size)
 
