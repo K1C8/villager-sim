@@ -4,6 +4,7 @@ from gametools.vector2 import *
 import TileFuncs
 import pygame
 from pygame.locals import *
+from PathFinding import a_star_search
 
 # TODO: Clean and add doctrings
 
@@ -60,10 +61,28 @@ class GameEntity(object):
 
 
         self.check_speed()
+        # Check if a new path needs to be calculated
+        if self.speed > 0. and self.location != self.destination:
+            if not hasattr(self, 'path') or not self.path:
+                self.path = a_star_search(self.location, self.destination, self.world)
 
+        # If a path is available, follow the next step in the path
+        if self.path:
+            next_step = self.path.pop(0)
+            self.location = next_step
+
+        # If no path is available or it's empty, default to straight-line walking
+        elif self.speed > 0. and self.location != self.destination:
+            vec_to_destination = self.destination - self.location
+            distance_to_destination = vec_to_destination.get_length()
+            heading = vec_to_destination.get_normalized()
+            travel_distance = min(distance_to_destination, self.speed * time_passed)  # Use time_passed to adjust for frame rate
+            self.location += travel_distance * heading
+        """
         if self.speed > 0. and self.location != self.destination:
             vec_to_destination = self.destination - self.location
             distance_to_destination = vec_to_destination.get_length()
             heading = vec_to_destination.get_normalized()
             travel_distance = min(distance_to_destination, self.speed)
             self.location += travel_distance * heading * self.speed
+        """
