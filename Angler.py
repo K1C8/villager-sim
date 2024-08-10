@@ -2,6 +2,8 @@ from aitools.StateMachine import *
 from Entities import *
 from GameEntity import *
 from common_state.Feeding import Feeding
+from common_state.Idle import Idle
+from configuration.villager_configuration import WORKING_TIME_END, ANGLER_RETURN_PROBABILITY
 from gametools.vector2 import Vector2
 from gametools.ImageFuncs import *
 from gametools.ani import *
@@ -10,8 +12,6 @@ import TileFuncs
 from World import *
 from async_funcs.entity_consumption import consume_func_villager
 #TODO: Clean up imports and add docstrings
-
-HUNGER_LIMIT = 40
 
 
 class Angler(GameEntity):
@@ -25,18 +25,21 @@ class Angler(GameEntity):
         exploring_state = Searching(self)
         delivering_state = Delivering(self)
         feeding_state = Feeding(self)
+        idle_state = Idle(self)
 
         # Adding states to the brain
         self.brain.add_state(fishing_state)
         self.brain.add_state(exploring_state)
         self.brain.add_state(delivering_state)
         self.brain.add_state(feeding_state)
+        self.brain.add_state(idle_state)
 
         self.max_speed = 80.0 * (1.0 / 60.0)
         self.speed = self.max_speed
         self.base_speed = self.speed
         self.view_range = 2
         self.fish = 0
+        self.hunger_limit = 40
 
         self.worldSize = world.world_size
         self.TileSize = self.world.tile_size
@@ -96,7 +99,13 @@ class Searching(State):
         self.angler = angler
 
     def entry_actions(self):
-        BaseFunctions.random_dest(self.angler)
+        dice = random()
+        if dice > ANGLER_RETURN_PROBABILITY or len(self.angler.world.known_fishing_spots) == 0:
+            BaseFunctions.random_dest(self.angler)
+        else:
+            known_spots = self.angler.world.known_fishing_spots
+            spot_dice = randint(1, len(known_spots)) - 1
+            self.angler.destination = known_spots[spot_dice]
 
     def do_actions(self):
         pass
@@ -114,12 +123,16 @@ class Searching(State):
                         destination_tile = TileFuncs.get_tile(self.angler.world, destination)
                         if destination_tile.walkable:
                             self.angler.destination = destination.copy()
+                            self.angler.world.known_fishing_spots.append(self.angler.destination)
                             return "Fishing"
 
             BaseFunctions.random_dest(self.angler)
 
-        if self.angler.food < HUNGER_LIMIT:
+        if self.angler.food < self.angler.hunger_limit:
             return "Feeding"
+        # Bro you have to work and get something before going home!
+        # if self.angler.world.time >= WORKING_TIME_END:
+        #     return "Idle"
 
     def exit_actions(self):
         pass
@@ -140,7 +153,6 @@ class Delivering(State):
         pass
 
     def check_conditions(self):
-
         if self.angler.location.get_distance_to(self.angler.destination) < 15:
             self.angler.world.fish += self.angler.fish
             self.angler.fish = 0

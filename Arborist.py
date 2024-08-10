@@ -2,6 +2,8 @@ from aitools.StateMachine import *
 from Entities import *
 from GameEntity import *
 from common_state.Feeding import Feeding
+from common_state.Idle import Idle
+from configuration.villager_configuration import WORKING_TIME_END
 from gametools.vector2 import Vector2
 from gametools.ImageFuncs import *
 from gametools.ani import *
@@ -11,8 +13,6 @@ import pygame
 import random
 import TileFuncs
 import BaseFunctions
-
-HUNGER_LIMIT = 40
 
 
 class Arborist(GameEntity):
@@ -24,14 +24,17 @@ class Arborist(GameEntity):
         # Creating the states
         planting_state = Arborist_Planting(self)
         feeding_state = Feeding(self)
+        idle_state = Idle(self)
 
         # Adding states to the brain
         self.brain.add_state(planting_state)
         self.brain.add_state(feeding_state)
+        self.brain.add_state(idle_state)
 
         self.max_speed = 80.0 * (1.0 / 60.0)
         self.speed = self.max_speed
         self.base_speed = self.speed
+        self.hunger_limit = 40
 
         self.worldSize = world.world_size
         self.TileSize = self.world.tile_size
@@ -67,8 +70,11 @@ class Arborist_Planting(State):
             self.arborist.destination = Vector2(self.arborist.location)
             self.arborist.update()
 
-        if self.arborist.food < HUNGER_LIMIT:
+        if self.arborist.food < self.arborist.hunger_limit:
             return "Feeding"
+
+        if self.arborist.world.time >= WORKING_TIME_END:
+            return "Idle"
 
     def do_actions(self):
 

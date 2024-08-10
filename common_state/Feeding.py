@@ -1,7 +1,7 @@
 import BaseFunctions
 import TileFuncs
 from aitools.StateMachine import State
-from configuration.villager_configuration import FEEDING_THRESHOLD
+from configuration.villager_configuration import FEEDING_THRESHOLD, WORKING_TIME_END
 
 
 class Feeding(State):
@@ -32,7 +32,11 @@ class Feeding(State):
                     self.entity.world.fish -= 1
                 elif self.entity.world.crop > 0:
                     self.entity.world.crop -= 1
-            return self.entity.primary_state
+
+            if self.entity.world.time >= WORKING_TIME_END:
+                return "Idle"
+            else:
+                return self.entity.primary_state
 
     def exit_actions(self):
         pass

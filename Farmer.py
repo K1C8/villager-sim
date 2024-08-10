@@ -7,6 +7,8 @@ from Entities import *
 from GameEntity import *
 from common_state.Feeding import Feeding
 from async_funcs.entity_consumption import consume_func_villager
+from common_state.Idle import Idle
+from configuration.villager_configuration import WORKING_TIME_END
 from configuration.world_configuration import TILES_PER_FARMER
 from gametools.vector2 import Vector2
 from gametools.ImageFuncs import *
@@ -17,7 +19,6 @@ import random
 import TileFuncs
 import BaseFunctions
 
-HUNGER_LIMIT = 40
 
 
 class Farmer(GameEntity):
@@ -34,17 +35,20 @@ class Farmer(GameEntity):
         feeding_state = Feeding(self)
         searching_state = FarmerSearching(self)
         sowing_state = FarmerSowing(self)
+        idle_state = Idle(self)
 
         # Adding states to the brain
         self.brain.add_state(tilling_state)
         self.brain.add_state(feeding_state)
         self.brain.add_state(searching_state)
         self.brain.add_state(sowing_state)
+        self.brain.add_state(idle_state)
 
         self.max_speed = 80.0 * (1.0 / 60.0)
         self.view_range = 1
         self.speed = self.max_speed
         self.base_speed = self.speed
+        self.hunger_limit = 40
 
         self.worldSize = world.world_size
         self.TileSize = self.world.tile_size
@@ -125,8 +129,11 @@ class FarmerTilling(aitools.StateMachine.State):
             BaseFunctions.random_dest(self.farmer)
 
         # If the entity is hungry, go back to the village and feed themselves
-        if self.farmer.food < HUNGER_LIMIT:
+        if self.farmer.food < self.farmer.hunger_limit:
             return "Feeding"
+        # If the time is about to sunset, go back to the rest spot in the village
+        if self.farmer.world.time >= WORKING_TIME_END:
+            return "Idle"
 
     def exit_actions(self):
         pass
@@ -168,8 +175,10 @@ class FarmerSearching(aitools.StateMachine.State):
 
             BaseFunctions.random_dest(self.farmer)
 
-        if self.farmer.food < HUNGER_LIMIT:
+        if self.farmer.food < self.farmer.hunger_limit:
             return "Feeding"
+        if self.farmer.world.time >= WORKING_TIME_END:
+            return "Idle"
 
     def exit_actions(self):
         pass
@@ -189,29 +198,10 @@ class FarmerSowing(aitools.StateMachine.State):
         pass
 
     def check_conditions(self):
-        if self.farmer.food < HUNGER_LIMIT:
+        if self.farmer.food < self.farmer.hunger_limit:
             return "Feeding"
-
-    def exit_actions(self):
-        pass
-
-
-class FarmerIdle(aitools.StateMachine.State):
-
-    def __init__(self, farmer):
-        aitools.StateMachine.State.__init__(self, "Idle")
-        self.farmer = farmer
-
-    def entry_actions(self):
-        # BaseFunctions.random_dest(self.farmer)
-        pass
-
-    def do_actions(self):
-        pass
-
-    def check_conditions(self):
-        if self.farmer.food < HUNGER_LIMIT:
-            return "Feeding"
+        if self.farmer.world.time >= WORKING_TIME_END:
+            return "Idle"
 
     def exit_actions(self):
         pass

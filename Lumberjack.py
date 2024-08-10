@@ -2,6 +2,8 @@ from aitools.StateMachine import *
 from Entities import *
 from GameEntity import *
 from common_state.Feeding import Feeding
+from common_state.Idle import Idle
+from configuration.villager_configuration import WORKING_TIME_END
 from gametools.vector2 import Vector2
 from gametools.ImageFuncs import *
 from gametools.ani import *
@@ -15,7 +17,6 @@ from World import *
 import BaseFunctions
 
 NoTreeImg = pygame.image.load("Images/Tiles/MinecraftGrass.png")
-HUNGER_LIMIT = 40
 
 
 class Lumberjack(GameEntity):
@@ -28,6 +29,7 @@ class Lumberjack(GameEntity):
         self.speed = 100.0 * (1.0 / 60.0)
         self.base_speed = self.speed
         self.view_range = 6
+        self.hunger_limit = 40
 
         # Creating the states
         self.searching_state = Searching(self)
@@ -98,8 +100,10 @@ class Searching(State):
 
             BaseFunctions.random_dest(self.lumberjack)
 
-        if self.lumberjack.food < HUNGER_LIMIT:
+        if self.lumberjack.food < self.lumberjack.hunger_limit:
             return "Feeding"
+        if self.lumberjack.world.time >= WORKING_TIME_END:
+            return "Idle"
 
     def exit_actions(self):
         pass
@@ -190,19 +194,19 @@ class Delivering(State):
         pass
 
 
-class Idle(State):
-    def __init__(self, Lumberjack):
-        State.__init__(self, "Idle")
-        self.lumberjack = Lumberjack
-
-    def entry_actions(self):
-        pass
-
-    def do_actions(self):
-        pass
-
-    def check_conditions(self):
-        pass
-
-    def exit_actions(self):
-        pass
+# class Idle(State):
+#     def __init__(self, Lumberjack):
+#         State.__init__(self, "Idle")
+#         self.lumberjack = Lumberjack
+#
+#     def entry_actions(self):
+#         pass
+#
+#     def do_actions(self):
+#         pass
+#
+#     def check_conditions(self):
+#         pass
+#
+#     def exit_actions(self):
+#         pass

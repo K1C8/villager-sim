@@ -79,9 +79,11 @@ class World(object):
         self.barn = []
         self.stonework = []
         self.fish_market = []
+        self.rest_places = []
 
         self.fields = []
         self.tile_array = [[Tile.Tile]]
+        self.known_fishing_spots = []
 
         # If a new world have no places suitable to start, then create the world again until it has one.
         has_found_starting_point = False
@@ -357,15 +359,6 @@ class World(object):
                     # elif key == "Barn":
                     #
                     # elif key == "StoneStorage":
-                    if new_bldg is not None:
-                        if new_bldg.can_drop_wood:
-                            self.lumber_yard.append(location * self.tile_size)
-                        if new_bldg.can_drop_crop:
-                            self.barn.append(location * self.tile_size)
-                        if new_bldg.can_drop_fish:
-                            self.fish_market.append(location * self.tile_size)
-                        if new_bldg.can_drop_stone:
-                            self.stonework.append(location * self.tile_size)
 
 
     def add_entity(self, entity):
@@ -406,6 +399,18 @@ class World(object):
                 self.tile_array[int(building.location.y) + tile_y][int(building.location.x) + tile_x] = (
                     Tile.BuildingTile(self, "MinecraftGrass"))
         self.world_surface.blit(building.image, building.location * self.tile_size)
+
+        if building is not None:
+            if building.can_drop_wood:
+                self.lumber_yard.append(building.location * self.tile_size)
+            if building.can_drop_crop:
+                self.barn.append(building.location * self.tile_size)
+            if building.can_drop_fish:
+                self.fish_market.append(building.location * self.tile_size)
+            if building.can_drop_stone:
+                self.stonework.append(building.location * self.tile_size)
+            if building.supports > 0:
+                self.rest_places.append(building.location * self.tile_size)
 
     def process(self, delta):
         """Runs through each entity and runs their process function.
@@ -506,20 +511,22 @@ class World(object):
             self.world_position.y = y_temp_1 + (y_temp_2 / 2)
 
     def get_food_court(self, entity : GameEntity):
-        # food_court_candidates = []
-        # if len(self.barn) == 0 and len(self.fish_market) == 0:
-        #     return None
-        # for barn in self.barn:
-        #     food_court_candidates.append((barn, barn.get_distance_to(p=entity.location)))
-        # for market in self.fish_market:
-        #     food_court_candidates.append((market, market.get_distance_to(p=entity.location)))
-        # food_court_candidates = sorted(food_court_candidates, key=lambda fc: fc[1])
-        # if len(food_court_candidates) > 0:
-        #     return food_court_candidates[0][0]
-        if len(self.barn) > 0:
-            return self.barn[0]
-        elif len(self.fish_market) > 0:
-            return self.fish_market[0]
+        food_court_candidates = []
+        if len(self.barn) == 0 and len(self.fish_market) == 0:
+            return None
+        if self.fish > 0:
+            for market in self.fish_market:
+                food_court_candidates.append((market, market.get_distance_to(p=entity.location)))
+        elif self.crop > 0:
+            for barn in self.barn:
+                food_court_candidates.append((barn, barn.get_distance_to(p=entity.location)))
+        food_court_candidates = sorted(food_court_candidates, key=lambda fc: fc[1])
+        if len(food_court_candidates) > 0:
+            return food_court_candidates[0][0]
+        # if len(self.barn) > 0:
+        #     return self.barn[0]
+        # elif len(self.fish_market) > 0:
+        #     return self.fish_market[0]
 
     def get_barn(self, entity):
         if len(self.barn) > 0:

@@ -3,6 +3,7 @@ from World import *
 from GameEntity import *
 from async_funcs.entity_consumption import consume_func_villager
 from common_state.Feeding import Feeding
+from common_state.Idle import Idle
 from gametools.vector2 import Vector2
 
 from Buildings import *
@@ -12,28 +13,27 @@ from random import *
 import pygame
 
 
-HUNGER_LIMIT = 60
-
 class Builder(GameEntity):
-    def __init__(self, world, image, rest):
+    def __init__(self, world, image):
         GameEntity.__init__(self, world=world, name="Builder", image_string=image, consume_func=consume_func_villager)
 
         self.current_build = None
 
-        self.speed = 100.0
+        self.speed = 80.0 * (1.0 / 60.0)
         self.primary_state = "Builder_Idle"
+        self.hunger_limit = 60
 
         self.building_state = Builder_Building(self)
-        self.Idle_state = Builder_Idle(self)
+        self.idle_state = Idle(self)
         self.Finding_state = Builder_Finding(self)
         self.feeding_state = Feeding(self)
 
         self.brain.add_state(self.building_state)
-        self.brain.add_state(self.Idle_state)
+        self.brain.add_state(self.idle_state)
         self.brain.add_state(self.Finding_state)
         self.brain.add_state(self.feeding_state)
 
-        self.IdleLocation = rest.location.copy()
+        # self.IdleLocation = rest.location.copy()
 
 
 class Builder_Building(State):
@@ -93,11 +93,12 @@ class Builder_Idle(State):
         self.Builder = Builder
 
     def entry_actions(self):
-        self.Builder.destination = self.Builder.IdleLocation
+        # self.Builder.destination = self.Builder.IdleLocation
+        pass
 
     def check_conditions(self):
         if len(self.Builder.world.BuildingQueue) >= 1:
             return "Finding"
 
-        if self.Builder.food < HUNGER_LIMIT:
+        if self.Builder.food < self.Builder.hunger_limit:
             return "Feeding"
