@@ -3,7 +3,7 @@ import asyncio
 from GameEntity import GameEntity
 from configuration.world_configuration import DAY_DURATION
 
-VILLAGER_FOOD_CONSUMPTION_RATE = 1
+VILLAGER_FOOD_CONSUMPTION_RATE = 20
 PLANT_WATER_CONSUMPTION_RATE = 1
 
 

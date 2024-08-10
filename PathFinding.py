@@ -6,11 +6,10 @@ import networkx as nx
 
 def create_graph(world):
     G = nx.Graph()
-    print("create graph")
+    # print("create graph")
     for x in range(world.w // 32):
         for y in range(world.h // 32):
             node = (x, y)
-            print("start with node: ", node)
             node_vec = vector2.Vector2(x, y) * 32
             tile = TileFuncs.get_tile(world, node_vec)
             if tile:

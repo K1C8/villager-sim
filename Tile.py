@@ -46,13 +46,13 @@ class WaterTile(Tile):
         Tile.__init__(self, world, tile_name)
         self.buildable_w = True
         self.fishable = True
-        self.cost = float('inf')
+        self.cost = 100
 
 class DeepWaterTile(Tile):
     def __init__(self, world, tile_name):
         Tile.__init__(self, world, tile_name)
         self.buildable_w = True
-        self.cost = float('inf')
+        self.cost = 100
 
 class SmoothStoneTile(Tile):
     def __init__(self, world, tile_name):

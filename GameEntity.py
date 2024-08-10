@@ -47,6 +47,7 @@ class GameEntity(object):
 
         self.tp = 1.0
         self.path = []
+        self.next_node = None
 
         # TODO (wazzup771@gmail.com | Nick Wayne): Not sure if these belong in the World class either
         self.info_bar = pygame.image.load("Images/Entities/info_bar.png").convert()
@@ -126,13 +127,49 @@ class GameEntity(object):
         #     travel_distance = min(distance_to_destination, self.speed)
         #     self.location += travel_distance * heading * self.speed
 
-
-        if self.speed > 0. and self.location != self.destination:
-            vec_to_destination = self.destination - self.location
-            distance_to_destination = vec_to_destination.get_length()
-            heading = vec_to_destination.get_normalized()
-            travel_distance = min(distance_to_destination, self.speed)
-            self.location += travel_distance * heading * self.speed
+        # if movable
+        if self.speed > 0.:
+            # if the entity is not at the destination
+            c_t = TileFuncs.get_tile(self.world, self.location)
+            d_t = TileFuncs.get_tile(self.world, self.destination)
+            dist = (c_t.location - d_t.location).get_length()
+            if c_t != d_t or dist > 1.0:
+                if len(self.path) == 0:
+                    # fill path with nodes
+                    self.path = a_star_search_nx(self.world.graph, self.location, self.destination) 
+                else: 
+                    if self.next_node is None:
+                        self.next_node = self.path.pop(0)
+                    
+                    curr_tile = TileFuncs.get_tile(self.world, self.location)
+                    next_tile = TileFuncs.get_tile(self.world, self.next_node) 
+                    if curr_tile != next_tile:
+                        next_node_offset = self.next_node + Vector2(0.1, 0.1) 
+                        vec_to_destination = next_node_offset - self.location
+                        distance_to_destination = vec_to_destination.get_length()
+                        heading = vec_to_destination.get_normalized()
+                        travel_distance = min(distance_to_destination, self.speed)
+                        self.location += travel_distance * heading * self.speed
+                    else:
+                        if len(self.path) > 0: 
+                            self.next_node = self.path.pop(0) 
+                        
+            else:
+                self.next_node = None
+                if self.location != self.destination:
+                    vec_to_destination = self.destination - self.location
+                    distance_to_destination = vec_to_destination.get_length()
+                    heading = vec_to_destination.get_normalized()
+                    travel_distance = min(distance_to_destination, self.speed)
+                    self.location += travel_distance * heading * self.speed                
+                        
+        # if self.speed > 0. and self.location != self.destination: 
+            
+        #     vec_to_destination = self.destination - self.location
+        #     distance_to_destination = vec_to_destination.get_length()
+        #     heading = vec_to_destination.get_normalized()
+        #     travel_distance = min(distance_to_destination, self.speed)
+        #     self.location += travel_distance * heading * self.speed
 
 
         self.tile_location_x = int(self.location.x/self.world.tile_size)

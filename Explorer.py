@@ -15,6 +15,7 @@ from common_state.Idle import Idle
 from configuration.villager_configuration import WORKING_TIME_END
 from gametools.vector2 import *
 import Tile
+import TileFuncs
 
 class Explorer(GameEntity.GameEntity):
     """See file doctring for the description."""
@@ -136,7 +137,9 @@ class Return(aitools.StateMachine.State):
 
     def check_conditions(self):
         """Check if the explorer should still be exploring"""
-        if self.explorer.location == self.explorer.destination:
+        curr_tile = TileFuncs.get_tile(self.explorer.world, self.explorer.location)
+        dest_tile = TileFuncs.get_tile(self.explorer.world, self.explorer.destination)
+        if curr_tile == dest_tile:
             return "UnloadStone"
         
     def exit_actions(self):
@@ -163,14 +166,15 @@ class UnloadStone(aitools.StateMachine.State):
 
     def check_conditions(self):
         """Check if the explorer should still be exploring"""
+        if self.explorer.hunger_limit > self.explorer.food:
+            return "Feeding"
+        
         if self.explorer.stone <= 0:
             return "SearchStone"
         
     def exit_actions(self):
         """What the explorer does as it stops exploring"""
         BaseFunctions.random_dest(self.explorer)
-        if self.explorer.hunger_limit > self.explorer.food:
-            return "Feeding"
         pass
     
 class Exploring(aitools.StateMachine.State):
