@@ -73,12 +73,13 @@ class Manor(Building):
 
         self.image = self.image_funcs.get_irregular_image(2, 2, 2, 4)
 
-        self.supports = 15
+        self.supports = 10
         self.cost_stone = 100
         self.cost_wood = 50
 
         self.world.MAXpopulation += self.supports
-        
+
+
 class TownCenter(Building):
     def __init__(self, world, pos_tile: Vector2, image_string="TownCenter"):
         print("Pos_tile at TownCenter.__init__ is " + str(pos_tile))
@@ -92,7 +93,7 @@ class TownCenter(Building):
         self.can_drop_wood = True
         self.can_drop_stone = True
         
-        self.supports = 15
+        self.supports = 10
         self.cost = 500
         self.cost_wood = 200
         self.cost_stone = 200

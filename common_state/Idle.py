@@ -16,11 +16,11 @@ class Idle(State):
 
     def entry_actions(self):
         self.rested = False
-        print("Entity id " + str(self.entity.id) + " has entered idle state.")
+        # print("Entity id " + str(self.entity.id) + " has entered idle state.")
         # self.Builder.destination = self.Builder.IdleLocation
         destination = get_idle_destination(self.entity)
         if destination is not None:
-            print("Entity id " + str(self.entity.id) + " is going to rest.")
+            # print("Entity id " + str(self.entity.id) + " is going to rest.")
             self.entity.destination = destination
 
     def do_actions(self):

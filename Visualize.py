@@ -52,30 +52,31 @@ class Visualizer:
             screen (pygame.Surface): The surface on which to render the paths.
         """
         for entity in self.world.entities.values():
-            match entity:
-                case Lumberjack():
-                    color = LINE_COLOR[0]
-                case Angler():
-                    color = LINE_COLOR[1]
-                case Arborist():
-                    color = LINE_COLOR[2]
-                case Builder():
-                    color = LINE_COLOR[3]
-                case Explorer():
-                    color = LINE_COLOR[4]
-                case Farmer():
-                    color = LINE_COLOR[5]
-                case FishingShip():
-                    color = LINE_COLOR[6]
-                case _:
-                    color = (0, 0, 0) # default color: Black
-            
-            # Calculate the start and end positions for the path
-            start_pos = (int(entity.world_location.x), int(entity.world_location.y))
-            end_pos = (int(entity.destination.x + entity.world.world_position.x),
-                        int(entity.destination.y + entity.world.world_position.y))
+            if entity is not None:
+                match entity:
+                    case Lumberjack():
+                        color = LINE_COLOR[0]
+                    case Angler():
+                        color = LINE_COLOR[1]
+                    case Arborist():
+                        color = LINE_COLOR[2]
+                    case Builder():
+                        color = LINE_COLOR[3]
+                    case Explorer():
+                        color = LINE_COLOR[4]
+                    case Farmer():
+                        color = LINE_COLOR[5]
+                    case FishingShip():
+                        color = LINE_COLOR[6]
+                    case _:
+                        color = (0, 0, 0) # default color: Black
 
-            # Draw the path on the screen
-            self.draw_path(screen, start_pos, end_pos, color)
+                # Calculate the start and end positions for the path
+                start_pos = (int(entity.world_location.x), int(entity.world_location.y))
+                end_pos = (int(entity.destination.x + entity.world.world_position.x),
+                            int(entity.destination.y + entity.world.world_position.y))
+
+                # Draw the path on the screen
+                self.draw_path(screen, start_pos, end_pos, color)
         
         

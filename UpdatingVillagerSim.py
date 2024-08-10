@@ -12,7 +12,7 @@ import TileFuncs
 import World
 import DebugTools
 from Visualize import Visualizer
-from configuration.world_configuration import LINE_COLOR
+from configuration.world_configuration import LINE_COLOR, FPS
 
 global DEBUG_MODE
 DEBUG_MODE = True
@@ -68,7 +68,7 @@ def run(fullscreen, world_size=64):
     while not done:
 
         # Cap the game at 60 fps
-        time_passed_seconds = game_world.clock.tick(60) / 1000.0
+        time_passed_seconds = game_world.clock.tick(FPS) / 1000.0
         pos = gametools.vector2.Vector2(*pygame.mouse.get_pos())
 
         for event in pygame.event.get():
@@ -130,6 +130,9 @@ def run(fullscreen, world_size=64):
             screen.blit(dark_filter, (0, 0))
 
         if DEBUG_MODE:
+            living_entities_count = (game_world.angler_count + game_world.arborist_count + game_world.builder_count
+                                     + game_world.explorer_count + game_world.farmer_count
+                                     + game_world.lumberjack_count)
             # print day string to top left corner of the screen
             debug_day_string =         "Day: " + str(game_world.day)
             debug_day_status_string =  "Status: " + ("Day" if game_world.is_day else "Night")
@@ -138,7 +141,7 @@ def run(fullscreen, world_size=64):
             debug_res_fish_string =    "Fish: " + str(game_world.fish)
             debug_res_crop_string =    "Crop: " + str(game_world.crop)
             debug_res_stone_string =   "Stone: " + str(game_world.stone)
-            debug_res_entity_count =   "Entities: " + str(len(game_world.entities))
+            debug_res_entity_count =   "Entities: " + str(living_entities_count)
             debug_farmer_count =       "Farmers: " + str(game_world.farmer_count)
             debug_lumberjack_count =   "Lumberjacks: " + str(game_world.lumberjack_count)
             debug_angler_count =       "Anglers: " + str(game_world.angler_count)

@@ -1,3 +1,5 @@
+from random import randint
+
 import pygame
 
 from gametools.vector2 import Vector2
@@ -14,9 +16,13 @@ class Tile(object):
         self.plantable = False
         self.tillable = False
         self.crop_plantable = False
+        self.crop_waterable = False
+        self.crop_harvestable = False
         self.buildable = False
         self.buildable_w = False
         self.darkness = 0
+        self.watered_times = 0
+        self.watered_req = 0
 
         self.id = 0
         self.rect = pygame.Rect((0, 0), self.img.get_size())
@@ -114,10 +120,14 @@ class ShootFieldTile(Tile):
         Tile.__init__(self, world, tile_name)
         self.walkable = True
         self.cost = 10
+        self.watered_times = 0
+        self.watered_req = randint(1, 2)
+        self.crop_waterable = True
 
 
 class MatureFieldTile(Tile):
     def __init__(self, world, tile_name):
         Tile.__init__(self, world, tile_name)
         self.walkable = True
+        self.crop_harvestable = True
         self.cost = 3

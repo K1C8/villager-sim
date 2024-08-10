@@ -1,5 +1,5 @@
 import copy
-import sys
+import queue
 import pygame
 
 import Buildings
@@ -10,6 +10,7 @@ import math
 import Tile
 import Clips
 import Farmer
+import Builder
 import Lumberjack
 import Angler
 import Explorer
@@ -74,6 +75,7 @@ class World(object):
         self.angler_count = 0
         self.explorer_count = 0
         self.arborist_count = 0
+        self.builder_count = 0
 
         self.lumber_yard = []
         self.barn = []
@@ -81,9 +83,21 @@ class World(object):
         self.fish_market = []
         self.rest_places = []
 
+        # Related lists for farming works.
         self.fields = []
-        self.tile_array = [[Tile.Tile]]
+        self.sow_queue = queue.Queue()
+        self.water_queue = queue.Queue()
+        self.harvest_queue = queue.Queue()
+
+        # Queue for builders.
+        self.BuildingQueue = queue.Queue()
+
+        self.fields_waiting_to_sow = []
+        self.fields_waiting_to_water = []
+        self.fields_waiting_to_harvest = []
+
         self.known_fishing_spots = []
+        self.tile_array = [[Tile.Tile]]
 
         # If a new world have no places suitable to start, then create the world again until it has one.
         has_found_starting_point = False
@@ -231,12 +245,15 @@ class World(object):
         best_starting_blocks = []
         # Matrix to store GrassTiles and TreePlantedTiles in each block
         arable_tiles_matrix = [[0 for w in range(0, w_block_count)] for h in range(0, h_block_count)]
+        # Matrix to store WaterTile in each block
+        water_tiles_matrix = [[0 for w in range(0, w_block_count)] for h in range(0, h_block_count)]
         # Skipping all 8x8 blocks on the edges of the map
-        for block_h_coordinate in range(1, h_block_count):
-            for block_w_coordinate in range(1, w_block_count):
+        for block_h_coordinate in range(0, h_block_count):
+            for block_w_coordinate in range(0, w_block_count):
                 # There are some twists in the logic. Vector2 uses (x, y) coordinate; while tile_array uses [y][x]
                 block_upperleft_tile = vector2.Vector2(block_h_coordinate * 8, block_w_coordinate * 8)
                 arable_tiles = 0
+                water_tiles = 0
                 buildable_lots = 0
 
                 # Calculate arable_tiles and buildable_lots
@@ -246,6 +263,8 @@ class World(object):
                         if (isinstance(tile, Tile.GrassTile) or isinstance(tile, Tile.TreePlantedTile)
                                 or isinstance(tile, Tile.Baby_Tree)):
                             arable_tiles += 1
+                        if isinstance(tile, Tile.WaterTile):
+                            water_tiles += 1
                         if y % 2 == 0 and x % 2 == 0:
                             lot_tiles = [self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y],
                                          self.tile_array[block_w_coordinate * 8 + x + 1][block_h_coordinate * 8 + y],
@@ -260,9 +279,11 @@ class World(object):
                 if buildable_lots > 5:
                     suitable_starting_blocks.append(block_upperleft_tile)
                 arable_tiles_matrix[block_w_coordinate][block_h_coordinate] = arable_tiles
+                water_tiles_matrix[block_w_coordinate][block_h_coordinate] = water_tiles
         print(suitable_starting_blocks)
         print(arable_tiles_matrix)
-        # Calculate arable tiles sum of neighboring blocks of each block
+        print(water_tiles_matrix)
+        # Calculate arable tiles and water tiles sum of neighboring blocks of each block
         for starting_block in suitable_starting_blocks:
             w_block = int(starting_block.x) // 8
             h_block = int(starting_block.y) // 8
@@ -276,13 +297,23 @@ class World(object):
                                          arable_tiles_matrix[w_block - 1][h_block + 1] +
                                          arable_tiles_matrix[w_block][h_block + 1] +
                                          arable_tiles_matrix[w_block + 1][h_block + 1])
+                surround_water_tiles = (water_tiles_matrix[w_block - 1][h_block - 1] +
+                                        water_tiles_matrix[w_block][h_block - 1] +
+                                        water_tiles_matrix[w_block + 1][h_block - 1] +
+                                        water_tiles_matrix[w_block - 1][h_block] +
+                                        water_tiles_matrix[w_block + 1][h_block] +
+                                        water_tiles_matrix[w_block - 1][h_block + 1] +
+                                        water_tiles_matrix[w_block][h_block + 1] +
+                                        water_tiles_matrix[w_block + 1][h_block + 1])
                 print("Checking block w_block: " + str(w_block) + ", h_block: " + str(h_block) + ", surrounding " +
-                      "arable tiles count is: " + str(surround_arable_tiles))
-                if surround_arable_tiles > 160:
+                      "arable tiles count is: " + str(surround_arable_tiles) + ", water tiles count is " +
+                      str(surround_water_tiles))
+                if surround_arable_tiles > 160 and surround_water_tiles > 10:
                     best_starting_blocks.append(starting_block)
         print(best_starting_blocks)
-        print(best_starting_blocks[len(best_starting_blocks) // 2])
-        return best_starting_blocks[len(best_starting_blocks) // 2]
+        if len(best_starting_blocks) > 0:
+            print(best_starting_blocks[len(best_starting_blocks) // 2])
+            return best_starting_blocks[len(best_starting_blocks) // 2]
 
     def populate(self):
         """Populates the world with entities.
@@ -468,9 +499,10 @@ class World(object):
         surface.blit(self.world_surface, self.world_position)
 
         for entity in self.entities.values():
-            entity.render(surface)
-            if entity.active_info:
-                entity.render_info_bar(surface, entity)
+            if entity is not None:
+                entity.render(surface)
+                if entity.active_info:
+                    entity.render_info_bar(surface, entity)
 
     def render_all(self, surface):
         """Calls the clipper's render function, which also calls
@@ -510,7 +542,7 @@ class World(object):
             y_temp_2 = self.clipper.rect_view_h * self.clipper.b
             self.world_position.y = y_temp_1 + (y_temp_2 / 2)
 
-    def get_food_court(self, entity : GameEntity):
+    def get_food_court(self, entity: GameEntity):
         food_court_candidates = []
         if len(self.barn) == 0 and len(self.fish_market) == 0:
             return None
@@ -575,5 +607,19 @@ class World(object):
                 # Debugging use only.
                 print("Entity:" + str(entity.id) + " has dead.")
                 self.entities[entity_to_delete.id] = None
+                match entity:
+                    case Angler.Angler():
+                        self.angler_count -= 1
+                    case Arborist.Arborist():
+                        self.arborist_count -= 1
+                    case Builder.Builder():
+                        # Placeholder
+                        continue
+                    case Explorer.Explorer():
+                        self.explorer_count -= 1
+                    case Farmer.Farmer():
+                        self.farmer_count -= 1
+                    case Lumberjack.Lumberjack():
+                        self.lumberjack_count -= 1
 
         del entity_to_delete

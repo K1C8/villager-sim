@@ -6,6 +6,9 @@ DAY_DURATION = DAYTIME_DURATION + NIGHTTIME_DURATION
 # Configuration of maximum managed tiles for each farmer
 TILES_PER_FARMER = 20
 
+# FPS Target
+FPS = 60
+
 # Configuration for colors
 LINE_COLOR = [(255, 0, 0), # Red - Lumberjack
               (255, 255, 0), # Yellow - Angler
