@@ -15,7 +15,7 @@ def random_dest(entity, recurse=False, r_num=0, r_max=6):
     if recurse:
         entity.orientation += 30
     else:
-        entity.orientation += random.randint(-20, 30)
+        entity.orientation += random.randint(-25, 30)
     angle = math.radians(entity.orientation)
     distance = random.randint(50, 100)
     possible_dest = Vector2(entity.location.x + math.cos(angle) * distance,

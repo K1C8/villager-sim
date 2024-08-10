@@ -86,3 +86,14 @@ def get_vnn_array(world, location, r):
             return_array.append(new_location)
 
     return return_array
+
+
+def is_entity_collided(world, entity):
+    for i in world.entities.items():
+        if i[1] is not None and i[1].id != entity.id:
+            i_tile_location = vector2.Vector2(i[1].tile_location_x, i[1].tile_location_y)
+            ent_tile_location = vector2.Vector2(entity.tile_location_x, entity.tile_location_y)
+            if i_tile_location == ent_tile_location:
+                return True
+
+

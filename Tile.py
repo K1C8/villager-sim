@@ -112,14 +112,14 @@ class SoilTile(Tile):
         Tile.__init__(self, world, tile_name)
         self.walkable = True
         self.crop_plantable = True
-        self.cost = 3
+        # self.cost = 3
 
 
 class ShootFieldTile(Tile):
     def __init__(self, world, tile_name):
         Tile.__init__(self, world, tile_name)
         self.walkable = True
-        self.cost = 10
+        # self.cost = 10
         self.watered_times = 0
         self.watered_req = randint(1, 2)
         self.crop_waterable = True
@@ -130,4 +130,4 @@ class MatureFieldTile(Tile):
         Tile.__init__(self, world, tile_name)
         self.walkable = True
         self.crop_harvestable = True
-        self.cost = 3
+        # self.cost = 3

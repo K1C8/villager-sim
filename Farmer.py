@@ -207,7 +207,9 @@ class FarmerSearching(aitools.StateMachine.State):
             if len(self.farmer.harvest_list) > 0:
                 self.farmer.destination = self.farmer.harvest_list[0].location
                 print("Farmer id " + str(self.farmer.id) + " harvest list: " + str(len(self.farmer.harvest_list))
-                      + ", first of the harvest list is " + str(self.farmer.harvest_list[0].location))
+                      + ", first of the harvest list is "
+                      + str(self.farmer.harvest_list[0].location.x // 32) + ", "
+                      + str(self.farmer.harvest_list[0].location.y // 32) + ")")
             else:
                 harvest_tile = self.farmer.world.harvest_queue.get()
                 self.farmer.harvest_list.append(harvest_tile)
@@ -239,7 +241,9 @@ class FarmerSearching(aitools.StateMachine.State):
               (self.farmer.world.sow_queue is not None and not self.farmer.world.sow_queue.empty())):
             if len(self.farmer.sow_list) > 0:
                 print("Farmer id " + str(self.farmer.id) + " sow list: " + str(len(self.farmer.sow_list))
-                      + ", first of the sow list is " + str(self.farmer.sow_list[0].location))
+                      + ", first of the sow list is ("
+                      + str(self.farmer.sow_list[0].location.x // 32) + ", "
+                      + str(self.farmer.sow_list[0].location.y // 32) + ")")
                 self.farmer.destination = self.farmer.sow_list[0].location
             else:
                 sow_tile = self.farmer.world.sow_queue.get()
@@ -251,7 +255,9 @@ class FarmerSearching(aitools.StateMachine.State):
             if len(self.farmer.water_list) > 0:
                 self.farmer.destination = self.farmer.water_list[0].location
                 print("Farmer id " + str(self.farmer.id) + " water list: " + str(len(self.farmer.water_list))
-                      + ", first of the water list is " + str(self.farmer.water_list[0].location))
+                      + ", first of the water list is "
+                      + str(self.farmer.water_list[0].location.x // 32) + ", "
+                      + str(self.farmer.water_list[0].location.y // 32) + ")")
             else:
                 water_tile = self.farmer.world.water_queue.get()
                 self.farmer.water_list.append(water_tile)
@@ -428,11 +434,20 @@ class FarmerHarvesting(aitools.StateMachine.State):
 
     def check_conditions(self):
         check = TileFuncs.get_tile(self.farmer.world, Vector2(self.farmer.location))
-        if (self.farmer.location.get_distance_to(self.farmer.destination) < (0.5 * self.farmer.world.tile_size)
+        if TileFuncs.is_entity_collided(self.farmer.world, self.farmer):
+            print("Farmer id " + str(self.farmer.id) + " deteced colliding on tile.")
+            for tile in self.farmer.harvest_list:
+                self.farmer.world.harvest_queue.put(tile)
+                self.farmer.harvest_list.remove(tile)
+            return self.farmer.primary_state
+        if (self.farmer.location.get_distance_to(self.farmer.destination) < (0.10 * self.farmer.world.tile_size)
                 and check.crop_harvestable):
-            self.farmer.destination = Vector2(self.farmer.location)
+            # This will snap the farmer to the target tile.
+            self.farmer.location = Vector2(self.farmer.destination)
+            check = TileFuncs.get_tile(self.farmer.world, Vector2(self.farmer.location))
 
             if check.name != "MatureField":
+                print("Farmer id " + str(self.farmer.id) + " on wrong tile.")
                 self.farmer.hit = 0
                 self.farmer.update()
                 return self.farmer.primary_state
@@ -470,8 +485,8 @@ class FarmerHarvesting(aitools.StateMachine.State):
 
                 return "Delivering"
 
-        elif self.farmer.location.get_distance_to(self.farmer.destination) < self.farmer.speed:
-            BaseFunctions.random_dest(self.farmer)
+        # elif self.farmer.location.get_distance_to(self.farmer.destination) < self.farmer.speed:
+        #     BaseFunctions.random_dest(self.farmer)
 
         # If the entity is hungry, go back to the village and feed themselves
         if self.farmer.food < self.farmer.hunger_limit:

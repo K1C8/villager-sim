@@ -4,6 +4,7 @@ from GameEntity import *
 from async_funcs.entity_consumption import consume_func_villager
 from common_state.Feeding import Feeding
 from common_state.Idle import Idle
+from gametools.ani import Ani
 from gametools.vector2 import Vector2
 
 from Buildings import *
@@ -37,6 +38,22 @@ class Builder(GameEntity):
         self.brain.add_state(self.feeding_state)
 
         # self.IdleLocation = rest.location.copy()
+        self.animation = Ani(6, 10)
+        self.pic = pygame.image.load("Images/Entities/map.png")
+        self.img_func = ImageFuncs(18, 17, self.pic)
+        self.sprites = self.img_func.get_images(5, 0, 4)
+        self.hit = 0
+        self.update()
+
+    def update(self):
+        # Updates image every 10 cycles and adds 1 to the hit count; tilling and harvesting require 4 hits;
+        # sowing and watering require 8 hits
+        self.image = self.sprites[self.animation.get_frame()]
+        self.image.set_colorkey((255, 0, 255))
+        if self.animation.finished:
+            # print("Farmer id " + str(self.id) + " hit +1.")
+            self.hit += 1
+            self.animation.finished = False
 
 
 class Builder_Building(State):
