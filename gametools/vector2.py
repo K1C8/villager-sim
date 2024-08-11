@@ -1,7 +1,23 @@
+"""
+CS5150 Game AI Final Project
+Team Member: Jianyan Chen, Ruidi Huang, Xin Qi
+Aug 2024
+This is an original file from the repo.
+We did not make any change to it in final project.
+"""
+
 from math import sqrt
 from gametools.util import format_number
 
 class Vector2(object):
+    """
+    A 2D vector class for representing points or directions in a 2D space.
+    It supports various vector operations such as addition, subtraction, multiplication, 
+    normalization, and calculating the length or distance between vectors.
+
+    Attributes:
+        _v (list): A list containing the x and y components of the vector.
+    """
 
     __slots__ = ('_v', )
     _gameobjects_vector = 2
@@ -22,10 +38,17 @@ class Vector2(object):
             self._v = [float(x), float(y)]
 
     def _get_length(self):
+        """Calculates and returns the length (magnitude) of the vector."""
         x, y = self._v
         return sqrt(x * x + y * y)
 
     def _set_length(self, length):
+        """
+        Sets the length (magnitude) of the vector while maintaining its direction.
+
+        Args:
+            length (float): The new length of the vector.
+        """
         v = self._v
         try:
             x, y = v
@@ -40,6 +63,16 @@ class Vector2(object):
 
     @classmethod
     def from_floats(cls, x, y):
+        """
+        Creates a Vector2 object from two float values.
+
+        Args:
+            x (float): The x component of the vector.
+            y (float): The y component of the vector.
+
+        Returns:
+            Vector2: A new Vector2 object.
+        """
         vec = cls.__new__(cls, object)
         vec._v = [x, y]
         return vec
@@ -69,6 +102,15 @@ class Vector2(object):
 
     @classmethod
     def _from_float_sequence(cls, sequence):
+        """
+        Creates a Vector2 object from a sequence of floats.
+
+        Args:
+            sequence (sequence): A sequence containing at least two floats.
+
+        Returns:
+            Vector2: A new Vector2 object.
+        """
         v = cls.__new__(cls, object)
         v._v = list(sequence[:2])
         return v
@@ -80,9 +122,16 @@ class Vector2(object):
         return vec
 
     def get_x(self):
+        """Returns the x component of the vector."""
         return self._v[0]
 
     def set_x(self, x):
+        """
+        Sets the x component of the vector.
+
+        Args:
+            x (float): The new x component.
+        """
         try:
             self._v[0] = 1.0 * x
         except:
@@ -90,9 +139,16 @@ class Vector2(object):
     x = property(get_x, set_x, None, "x component.")
 
     def get_y(self):
+        """Returns the y component of the vector."""
         return self._v[1]
 
     def set_y(self, y):
+        """
+        Sets the y component of the vector.
+
+        Args:
+            y (float): The new y component.
+        """
         try:
             self._v[1] = 1.0 * y
         except:
@@ -103,17 +159,21 @@ class Vector2(object):
     #v = property(get_y, set_y, None, "v component (alias for y).")
 
     def __str__(self):
+        """Returns a string representation of the vector with formatted components."""
         x, y = self._v
         return "(%s, %s)" % (format_number(x), format_number(y))
 
     def __repr__(self):
+        """Returns an official string representation of the vector."""
         x, y = self._v
         return "Vector2(%s, %s)" % (x, y)
 
     def __iter__(self):
+        """Returns an iterator over the vector components."""
         return iter(self._v[:])
 
     def __len__(self):
+        """Returns the number of components in the vector (always 2)."""
         return 2
 
     def __getitem__(self, index):
@@ -136,25 +196,29 @@ class Vector2(object):
             raise TypeError("Must be a number")
 
     def __eq__(self, rhs):
+        """Checks if two vectors are equal."""
         x, y = self._v
         xx, yy = rhs
         return x == xx and y == yy
 
     def __ne__(self, rhs):
+        """Checks if two vectors are not equal."""
         x, y = self._v
         xx, yy, = rhs
         return x != xx or y != yy
 
     def __hash__(self):
-
+        """Returns the hash value of the vector."""
         return hash(self._v)
 
     def __add__(self, rhs):
+        """Adds two vectors."""
         x, y = self._v
         xx, yy = rhs
         return Vector2.from_floats(x + xx, y + yy)
 
     def __iadd__(self, rhs):
+        """Adds another vector to this vector in place."""
         xx, yy = rhs
         v = self._v
         v[0] += xx
@@ -162,21 +226,25 @@ class Vector2(object):
         return self
 
     def __radd__(self, lhs):
+        """Adds this vector to another vector or value."""
         x, y = self._v
         xx, yy = lhs
         return self.from_floats(x + xx, y + yy)
 
     def __sub__(self, rhs):
+        """Subtracts one vector from another."""
         x, y = self._v
         xx, yy = rhs
         return Vector2.from_floats(x - xx, y - yy)
 
     def __rsub__(self, lhs):
+        """Subtracts this vector from another vector or value."""
         x, y = self._v
         xx, yy = lhs
         return self.from_floats(xx - x, yy - y)
 
     def _isub__(self, rhs):
+        """Subtracts another vector from this vector in place."""
         xx, yy = rhs
         v = self._v
         v[0] -= xx
@@ -207,7 +275,7 @@ class Vector2(object):
         return self
 
     def __rmul__(self, lhs):
-
+        """Multiplies this vector with a scalar or another vector."""
         x, y = self._v
         if hasattr(lhs, "__getitem__"):
             xx, yy = lhs
@@ -241,7 +309,7 @@ class Vector2(object):
         return self
 
     def __rdiv__(self, lhs):
-
+        """Divides a scalar or another vector by this vector."""
         x, y = self._v
         if hasattr(lhs, "__getitem__"):
             xx, yy = lhs
@@ -256,11 +324,11 @@ class Vector2(object):
         return Vector2.from_floats(-x, -y)
 
     def __pos__(self):
-
+        """Returns a copy of this vector."""
         return self.copy()
 
     def __nonzero__(self):
-
+        """Returns True if the vector is not (0, 0)."""
         x, y = self._v
         return bool(x or y)
 
@@ -309,6 +377,7 @@ class Vector2(object):
     normalize = normalise
 
     def get_normalised(self):
+        """Returns a normalized copy of this vector."""
         x, y = self._v
         l = sqrt(x * x + y * y)
         return Vector2.from_floats(x / l, y / l)

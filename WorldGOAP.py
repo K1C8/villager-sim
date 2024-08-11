@@ -1,3 +1,11 @@
+"""
+CS5150 Game AI Final Project
+Team Member: Jianyan Chen, Ruidi Huang, Xin Qi
+Aug 2024
+
+This is an UNUSED file from the original repo.
+"""
+
 from aitools import GoalMachine
 
 """This file will be the customized version of the goal machine for this world"""
