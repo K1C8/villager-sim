@@ -81,9 +81,16 @@ class SearchStone(aitools.StateMachine.State):
         or isinstance(curr_tile, Tile.CobblestoneTile): 
             return "CollectStone" 
         
-        curr_tile = self.explorer.world.tile_array[self.explorer.tile_location_y][self.explorer.tile_location_x] 
-        if self.explorer.location == self.explorer.destination:
-            BaseFunctions.random_dest(self.explorer)      
+        curr_tile = self.explorer.world.tile_array[self.explorer.tile_location_y][self.explorer.tile_location_x]
+
+        if self.explorer.location.get_distance_to(self.explorer.destination) < (0.5 * self.explorer.world.tile_size):
+            # if self.explorer.location == self.explorer.destination:
+            BaseFunctions.random_dest(self.explorer)
+
+        if self.explorer.food < self.explorer.hunger_limit:
+            return "Feeding"
+        if self.explorer.world.time >= WORKING_TIME_END:
+            return "Idle"
             
     def exit_actions(self):
         """What the explorer does as it stops exploring"""

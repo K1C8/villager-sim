@@ -1,3 +1,4 @@
+import Tile
 from aitools.StateMachine import *
 from GameEntity import GameEntity
 from configuration.world_configuration import WORLD_TILE_SIZE
@@ -18,6 +19,7 @@ class Building(GameEntity):
         # self.location = Vector2(self.tile_x * 32, self.tile_y * 32)
 
         self.cost = 100
+        self.rect = Vector2(32, 32)
         # Placeholder as is
         self.image = pygame.image.load("Images/Buildings/"+image_string+".png")
         
@@ -26,6 +28,16 @@ class Building(GameEntity):
         self.can_drop_wood = False
         self.can_drop_stone = False
         self.supports = 0
+        self.built_time = 0
+        self.time_to_build = 2400
+
+    def update(self):
+        # print("Updating building id:" + str(self.id))
+        for tile_x in range(self.image.get_width() // self.world.tile_size):
+            for tile_y in range(self.image.get_height() // self.world.tile_size):
+                self.world.tile_array[int(self.location.y) + tile_y][int(self.location.x) + tile_x] = (
+                    Tile.BuildingTile(self, "MinecraftGrass"))
+        self.world.world_surface.blit(self.image, self.location * self.world.tile_size)
 
 
 class LumberYard(Building):
@@ -38,11 +50,16 @@ class LumberYard(Building):
         Building.__init__(self, world, "Lumber Yard", pos_tile, image_string)
 
         self.image = self.image_funcs.get_irregular_image(2, 2, 2, 2)
+        self.unfinished_image = self.image_funcs.get_irregular_image(2, 2, 0, 2)
+        self.image.set_colorkey((255, 0, 255))
+        self.finish_image.set_colorkey((255, 0, 255))
+        self.unfinished_image.set_colorkey((255, 0, 255))
         self.Held = 0
         self.HeldMax = 50
         self.cost = 100
+        self.time_to_build = 4800
 
-        self.world.MAXwood += self.HeldMax
+        self.world.MAXWood += self.HeldMax
         self.can_drop_wood = True
 
 
@@ -57,13 +74,20 @@ class Dock(Building):
 
         self.image = self.image_funcs.get_irregular_image(2, 2, 2, 0)
 
+        self.unfinished_image = self.image_funcs.get_irregular_image(2, 2, 0, 0)
+        self.finish_image = self.image_funcs.get_irregular_image(2, 2, 2, 0)
+        self.image.set_colorkey((255, 0, 255))
+        self.finish_image.set_colorkey((255, 0, 255))
+        self.unfinished_image.set_colorkey((255, 0, 255))
+
         self.Held = 0
         self.HeldMax = 25
         self.cost = 150
+        self.time_to_build = 6000
         
         self.can_drop_fish = True
 
-        self.world.MAXfood += self.HeldMax
+        self.world.MAXFish += self.HeldMax
 
 
 class House(Building):
@@ -76,6 +100,7 @@ class House(Building):
         Building.__init__(self, world, "House", pos_tile, image_string)
 
         self.supports = 5
+        self.time_to_build = 600
         # self.cost_wood = 45
         # self.cost_stone = 5
 
@@ -92,8 +117,14 @@ class Manor(Building):
         Building.__init__(self, world, "Manor", pos_tile, image_string)
 
         self.image = self.image_funcs.get_irregular_image(2, 2, 2, 4)
+        self.finish_image = self.image_funcs.get_irregular_image(2, 2, 2, 4)
+        self.unfinished_image = self.image_funcs.get_irregular_image(2, 2, 0, 4)
+        self.image.set_colorkey((255, 0, 255))
+        self.finish_image.set_colorkey((255, 0, 255))
+        self.unfinished_image.set_colorkey((255, 0, 255))
 
         self.supports = 10
+        self.time_to_build = 2400
         # self.cost_stone = 100
         # self.cost_wood = 50
 
@@ -111,7 +142,11 @@ class TownCenter(Building):
         Building.__init__(self, world, "TownCenter", pos_tile, image_string)
        
         self.image = self.image_funcs.get_irregular_image(2, 2, 2, 6)
+        self.finish_image = self.image_funcs.get_irregular_image(2, 2, 2, 6)
+        self.unfinished_image = self.image_funcs.get_irregular_image(2, 2, 0, 6)
         self.image.set_colorkey((255, 0, 255))
+        self.finish_image.set_colorkey((255, 0, 255))
+        self.unfinished_image.set_colorkey((255, 0, 255))
 
         self.can_drop_fish = True
         self.can_drop_crop = True
@@ -120,6 +155,7 @@ class TownCenter(Building):
         
         self.supports = 5
         self.cost = 500
+        self.time_to_build = 9000
         # self.cost_wood = 200
         # self.cost_stone = 200
 
@@ -136,6 +172,8 @@ class UnderConstruction2x2(Building):
 
     def __init__(self, world, pos_tile: Vector2, image_string, will_be):
         Building.__init__(self, world, "Under Construction", pos_tile, image_string)
+
+        self.image = self.image_funcs.get_irregular_image(2, 2, 0, 2)
         self.will_be = will_be
         self.ttb = 30.0
         self.max_ttb = 30.0
@@ -160,13 +198,19 @@ class Barn(Building):
     def __init__(self, world, pos_tile: Vector2, image_string="Barn"):
         Building.__init__(self, world, "Barn", pos_tile, image_string)
 
-        self.image = self.image_funcs.get_irregular_image(2, 2, 2, 2)
+        self.image = self.image_funcs.get_irregular_image(2, 2, 2, 12)
+        self.finish_image = self.image_funcs.get_irregular_image(2, 2, 2, 12)
+        self.unfinished_image = self.image_funcs.get_irregular_image(2, 2, 0, 12)
+        self.image.set_colorkey((255, 0, 255))
+        self.finish_image.set_colorkey((255, 0, 255))
+        self.unfinished_image.set_colorkey((255, 0, 255))
         self.Held = 0
         self.HeldMax = 500
+        self.time_to_build = 3600
         # self.cost_stone = 100
         # self.cost_wood = 50
 
-        self.world.MAXwood += self.HeldMax
+        self.world.MAXWood += self.HeldMax
         self.can_drop_crop = True
 
 
@@ -179,13 +223,19 @@ class Stonework(Building):
     def __init__(self, world, pos_tile: Vector2, image_string="Stonework"):
         Building.__init__(self, world, "Stonework", pos_tile, image_string)
 
-        self.image = self.image_funcs.get_irregular_image(2, 2, 2, 2)
+        self.image = self.image_funcs.get_irregular_image(2, 2, 2, 10)
+        self.finish_image = self.image_funcs.get_irregular_image(2, 2, 2, 10)
+        self.unfinished_image = self.image_funcs.get_irregular_image(2, 2, 0, 10)
+        self.image.set_colorkey((255, 0, 255))
+        self.finish_image.set_colorkey((255, 0, 255))
+        self.unfinished_image.set_colorkey((255, 0, 255))
         self.Held = 0
         self.HeldMax = 500
+        self.time_to_build = 3600
         # self.cost_stone = 150
         # self.cost_wood = 50
 
-        self.world.MAXstone += self.HeldMax
+        self.world.MAXStone += self.HeldMax
         self.can_drop_stone = True
 
 
@@ -198,11 +248,17 @@ class FishMarket(Building):
     def __init__(self, world, pos_tile: Vector2, image_string="FishMarket"):
         Building.__init__(self, world, "FishMarket", pos_tile, image_string)
 
-        self.image = self.image_funcs.get_irregular_image(2, 2, 2, 2)
+        self.image = self.image_funcs.get_irregular_image(2, 2, 2, 8)
+        self.finish_image = self.image_funcs.get_irregular_image(2, 2, 2, 8)
+        self.unfinished_image = self.image_funcs.get_irregular_image(2, 2, 0, 8)
+        self.image.set_colorkey((255, 0, 255))
+        self.finish_image.set_colorkey((255, 0, 255))
+        self.unfinished_image.set_colorkey((255, 0, 255))
         self.Held = 0
         self.HeldMax = 500
+        self.time_to_build = 7200
         # self.cost_wood = 150
         # self.cost_stone = 50
 
-        self.world.MAXstone += self.HeldMax
+        self.world.MAXStone += self.HeldMax
         self.can_drop_fish = True

@@ -12,6 +12,9 @@ WORLD_TILE_SIZE = 32
 # FPS Target
 FPS = 60
 
+# Debug flag
+DEBUG = True
+
 # Utilize upper limit for buildings
 UTILIZE_LIMIT = 0.9
 

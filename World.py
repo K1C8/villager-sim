@@ -6,7 +6,7 @@ import Buildings
 from GameEntity import GameEntity
 from aitools.BuildingDecision import building_decision
 from gametools import vector2, VoronoiMapGen, MidpointDisplacement, PertTools
-from configuration.world_configuration import DAYTIME_DURATION, NIGHTTIME_DURATION, DAY_DURATION, UTILIZE_LIMIT
+from configuration.world_configuration import DAYTIME_DURATION, NIGHTTIME_DURATION, DAY_DURATION, UTILIZE_LIMIT, DEBUG
 import math
 import Tile
 import Clips
@@ -17,6 +17,7 @@ import Angler
 import Explorer
 import Arborist
 from PathFinding import create_graph
+
 
 class World(object):
     """This class holds everything in the game. It also
@@ -52,7 +53,7 @@ class World(object):
         self.wood = 100
         self.fish = 100
         self.crop = 500
-        self.stone = 0
+        self.stone = 700
 
         # Time
         self.day = 0
@@ -91,8 +92,8 @@ class World(object):
         self.water_queue = queue.Queue()
         self.harvest_queue = queue.Queue()
 
-        # Queue for builders.
-        self.BuildingQueue = queue.Queue()
+        # List for builders.
+        self.building_list = []
 
         self.fields_waiting_to_sow = []
         self.fields_waiting_to_water = []
@@ -272,7 +273,8 @@ class World(object):
                             lot_tiles = [self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y],
                                          self.tile_array[block_w_coordinate * 8 + x + 1][block_h_coordinate * 8 + y],
                                          self.tile_array[block_w_coordinate * 8 + x][block_h_coordinate * 8 + y + 1],
-                                         self.tile_array[block_w_coordinate * 8 + x +1][block_h_coordinate * 8 + y +1]]
+                                         self.tile_array[block_w_coordinate * 8 + x + 1][
+                                             block_h_coordinate * 8 + y + 1]]
                             lot_buildable = True
                             for tile in lot_tiles:
                                 if not tile.buildable:
@@ -342,15 +344,15 @@ class World(object):
                               "state": "Planting",
                               "class": Arborist.Arborist},
 
-                 "Farmer": {"count": 0,
+                 "Farmer": {"count": 1,
                             "state": "Searching",
                             "class": Farmer.Farmer},
 
                  "Explorer": {"count": 1,
                               "state": "SearchStone",
                               "class": Explorer.Explorer},
-                 "Builder": {"count": 0,
-                             "state": "Idle",
+                 "Builder": {"count": 1,
+                             "state": "Waiting",
                              "class": Builder.Builder}
                  }
 
@@ -406,7 +408,6 @@ class World(object):
                 new_ent.brain.set_state(start[key]["state"])
                 self.add_entity(new_ent)
 
-
     def add_entity(self, entity):
         """Maps the input entity to the entity hash table (dictionary)
         using the entity_id variable, then increments entity_id.
@@ -433,31 +434,45 @@ class World(object):
             self.explorer_count += 1
         elif isinstance(entity, Arborist.Arborist):
             self.arborist_count += 1
+        elif isinstance(entity, Builder.Builder):
+            self.builder_count += 1
 
     def add_building(self, building):
         self.buildings[self.building_id] = building
         building.id = self.building_id
         self.building_id += 1
-        print("Building width: " + str(building.location.x))
-        print("Building height: " + str(building.location.y))
+        print("Building x: " + str(building.location.x))
+        print("Building y: " + str(building.location.y))
 
         for tile_x in range(building.image.get_width() // self.tile_size):
             for tile_y in range(building.image.get_height() // self.tile_size):
-                self.tile_array[int(building.location.y) + tile_y][int(building.location.x) + tile_x] = (
-                    Tile.BuildingTile(self, "MinecraftGrass"))
+                # self.tile_array[int(building.location.y) + tile_y][int(building.location.x) + tile_x] = (
+                #     Tile.BuildingTile(self, "MinecraftGrass"))
+                new_bldg_tile = Tile.BuildingTile(self, "Cobble")
+                new_bldg_tile.location = vector2.Vector2(int(building.location.x) + tile_x,
+                                                         int(building.location.y) + tile_y) * 32
+                new_bldg_tile.rect.topleft = new_bldg_tile.location
+                self.tile_array[int(building.location.y) + tile_y][int(building.location.x) + tile_x] = new_bldg_tile
+                self.world_surface.blit(new_bldg_tile.img, new_bldg_tile.location)
         self.world_surface.blit(building.image, building.location * self.tile_size)
 
         if building is not None:
+            # All gathering point deviates one tile by one tile to the upper left corner of the building.
             if building.can_drop_wood:
-                self.lumber_yard.append(building.location * self.tile_size)
+                self.lumber_yard.append(building.location * self.tile_size +
+                                        vector2.Vector2(self.tile_size, self.tile_size))
             if building.can_drop_crop:
-                self.barn.append(building.location * self.tile_size)
+                self.barn.append(building.location * self.tile_size +
+                                 vector2.Vector2(self.tile_size, self.tile_size))
             if building.can_drop_fish:
-                self.fish_market.append(building.location * self.tile_size)
+                self.fish_market.append(building.location * self.tile_size +
+                                        vector2.Vector2(self.tile_size, self.tile_size))
             if building.can_drop_stone:
-                self.stonework.append(building.location * self.tile_size)
+                self.stonework.append(building.location * self.tile_size +
+                                      vector2.Vector2(self.tile_size, self.tile_size))
             if building.supports > 0:
-                self.rest_places.append(building.location * self.tile_size)
+                self.rest_places.append(building.location * self.tile_size +
+                                        vector2.Vector2(self.tile_size, self.tile_size))
 
     def process(self, delta):
         """Runs through each entity and runs their process function.
@@ -502,11 +517,24 @@ class World(object):
             self.fish -= 100
             print("Farmer created")
 
-        next_building = building_decision(self)
-        if next_building is not None:
+        is_builder_available = False
 
-            self.BuildingQueue.put(next_building)
+        for entity in self.entities.values():
+            if entity is not None and isinstance(entity, Builder.Builder):
+                if isinstance(entity.brain.active_state, Builder.Waiting):
+                    is_builder_available = True
 
+        if is_builder_available:
+            next_building = building_decision(self)
+            if next_building is not None and next_building not in self.building_list:
+                self.building_list.append(next_building)
+
+        if DEBUG and len(self.building_list) > 0:
+            print("Building list length: " + str(len(self.building_list)))
+
+        for building in self.buildings.values():
+            if building is not None:
+                building.update()
 
     def render(self, surface):
         """Blits the world_surface and all entities onto surface.
@@ -633,16 +661,21 @@ class World(object):
                 match entity:
                     case Angler.Angler():
                         self.angler_count -= 1
+                        break
                     case Arborist.Arborist():
                         self.arborist_count -= 1
+                        break
                     case Builder.Builder():
-                        # Placeholder
-                        continue
+                        self.builder_count -= 1
+                        break
                     case Explorer.Explorer():
                         self.explorer_count -= 1
+                        break
                     case Farmer.Farmer():
                         self.farmer_count -= 1
+                        break
                     case Lumberjack.Lumberjack():
                         self.lumberjack_count -= 1
+                        break
 
         del entity_to_delete

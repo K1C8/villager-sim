@@ -5,6 +5,7 @@ import TileFuncs
 import pygame
 from pygame.locals import *
 from PathFinding import a_star_search_nx, create_graph
+from configuration.world_configuration import DEBUG
 
 # TODO: Clean and add doctrings
 
@@ -70,6 +71,9 @@ class GameEntity(object):
             self.speed = 0.5 * self.base_speed
         else:
             self.speed = self.base_speed
+        if DEBUG:
+            pass
+            # print("Entity ID :" + str(self.id) + ", speed: " + str(self.speed))
 
     # TODO(wazzup771@gmail.com | Nick Wayne): This function doesn't belong in the world class, perhaps the GameEntity
     #  class.

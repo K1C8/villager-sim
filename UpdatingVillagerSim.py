@@ -144,6 +144,7 @@ def run(fullscreen, world_size=64):
             debug_angler_count =       "Anglers: " + str(game_world.angler_count)
             debug_explorer_count =     "Explorers: " + str(game_world.explorer_count)
             debug_arborist_count =     "Arborists: " + str(game_world.arborist_count)
+            debug_builder_count =     "Builders: " + str(game_world.builder_count)
 
             day_string_surface = debug_font.render(debug_day_string, True, (255, 255, 255)) 
             day_status_surface = debug_font.render(debug_day_status_string, True, (255, 255, 255))
@@ -158,6 +159,7 @@ def run(fullscreen, world_size=64):
             angler_count_s = debug_font.render(debug_angler_count, True, LINE_COLOR[1])
             explorer_count_s = debug_font.render(debug_explorer_count, True, LINE_COLOR[4])
             arborist_count_s = debug_font.render(debug_arborist_count, True, LINE_COLOR[2])
+            builder_count_s = debug_font.render(debug_builder_count, True, LINE_COLOR[3])
 
             debug_string_positions = [
                 (10, 10),
@@ -173,6 +175,7 @@ def run(fullscreen, world_size=64):
                 (10, 310),
                 (10, 340),
                 (10, 370),
+                (10, 400),
             ]
 
             surfaces = [
@@ -189,6 +192,7 @@ def run(fullscreen, world_size=64):
                 angler_count_s,
                 explorer_count_s,
                 arborist_count_s,
+                builder_count_s,
             ]
 
             # Draw rectangles and blit text surfaces

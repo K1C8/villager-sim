@@ -29,6 +29,7 @@ class Idle(State):
     def check_conditions(self):
         if self.entity.location.get_distance_to(self.entity.destination) < self.entity.speed:
             self.rested = True
+            self.entity.destination = self.entity.location
         if self.rested and WORKING_TIME_START <= self.entity.world.time < WORKING_TIME_END:
             if self.entity.food <= self.entity.hunger_limit:
                 return "Feeding"

@@ -4,7 +4,7 @@ import Buildings
 from configuration.world_configuration import UTILIZE_LIMIT
 from gametools import vector2
 
-DEBUG = False
+DEBUG = True
 
 def building_decision(world):
     next_building = None
