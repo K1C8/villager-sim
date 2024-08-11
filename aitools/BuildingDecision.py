@@ -11,12 +11,15 @@ def building_decision(world):
     # Decide which building to build next.
     if float(world.living_entities_count) / float(world.MAXpopulation) >= UTILIZE_LIMIT:
         next_building = {"class": Buildings.Manor, "location": None}
+    elif float(world.fish) / float(world.MAXFish) >= UTILIZE_LIMIT:
+        next_building = {"class": Buildings.FishMarket, "location": None}
     elif float(world.stone) / float(world.MAXStone) >= UTILIZE_LIMIT:
         next_building = {"class": Buildings.Stonework, "location": None}
     elif float(world.crop) / float(world.MAXCrop) >= UTILIZE_LIMIT:
         next_building = {"class": Buildings.Barn, "location": None}
-    elif float(world.fish) / float(world.MAXFish) >= UTILIZE_LIMIT:
-        next_building = {"class": Buildings.FishMarket, "location": None}
+    elif float(world.wood) / float(world.MAXWood) >= UTILIZE_LIMIT:
+        next_building = {"class": Buildings.LumberYard, "location": None}
+
 
     if next_building is not None and len(world.building_list) < world.builder_count:
         if DEBUG:

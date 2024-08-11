@@ -45,6 +45,8 @@ class Builder(GameEntity):
 
         self.target = None
         self.working_building = None
+        self.is_assistant = False
+        self.assistant_of = None
 
         self.wait_location = copy.deepcopy(self.world.get_food_court(self))
         self.animation = Ani(5, 10)
@@ -76,7 +78,16 @@ class Builder_Building(State):
         if self.Builder.location.get_distance_to(self.Builder.destination) < 2:
             self.Builder.location = self.Builder.destination
 
-        if self.Builder.working_building.time_to_build <= 0:
+        if self.Builder.is_assistant:
+            if (self.Builder.world.entities[self.Builder.assistant_of].working_building is None or
+                    self.Builder.world.entities[self.Builder.assistant_of].working_building.time_to_build <= 0):
+                print("Builder id " + str(self.Builder.id) + " stops assisting.")
+                self.Builder.is_assistant = False
+                self.Builder.assistant_of = None
+                self.Builder.destination = self.Builder.wait_location
+                return self.Builder.primary_state
+
+        if not self.Builder.is_assistant and self.Builder.working_building.time_to_build <= 0:
             self.Builder.world.building_list.pop(0)
             for y in range(self.Builder.working_building.SIZE_Y):
                 for x in range(self.Builder.working_building.SIZE_X):
@@ -105,12 +116,15 @@ class Builder_Building(State):
             return "Idle"
 
     def do_actions(self):
-        self.Builder.working_building.time_to_build -= self.Builder.tp
+        if not self.Builder.is_assistant:
+            self.Builder.working_building.time_to_build -= self.Builder.tp
+        elif self.Builder.world.entities[self.Builder.assistant_of].working_building is not None:
+            self.Builder.world.entities[self.Builder.assistant_of].working_building.time_to_build -= self.Builder.tp
 
     def entry_actions(self):
         # self.Builder.destination = self.Builder.location.copy()
         # self.building_complete = 0.0
-        if self.Builder.working_building is None:
+        if self.Builder.working_building is None and not self.Builder.is_assistant:
             new_bldg = self.Builder.target["class"](
                 self.Builder.world, copy.deepcopy(self.Builder.target["location"]))
             if DEBUG:
@@ -127,6 +141,14 @@ class Builder_Building(State):
             self.Builder.world.add_building(new_bldg)
             self.Builder.working_building = new_bldg
 
+    def exit_actions(self):
+        self.Builder.destination = self.Builder.wait_location
+        # if self.Builder.is_assistant:
+        #     print("Builder id " + str(self.Builder.id) + " stops assisting.")
+        #     self.Builder.is_assistant = False
+        #     self.Builder.assistant_of = None
+
+
 
 class Builder_Finding(State):  # Finding a suitable place to build.
     """If:
@@ -141,7 +163,7 @@ class Builder_Finding(State):  # Finding a suitable place to build.
         self.Builder = Builder
 
     def check_conditions(self):
-        if self.Builder.target is None:
+        if self.Builder.target is None and not self.Builder.is_assistant:
             return "Waiting"
 
         if self.Builder.location.get_distance_to(self.Builder.destination) < 2:
@@ -162,6 +184,17 @@ class Builder_Finding(State):  # Finding a suitable place to build.
             self.Builder.target = self.Builder.world.building_list[0]
             if self.Builder.target is None:
                 return
+            if self.Builder.world.builder_count > 1:
+                for entity in self.Builder.world.entities.values():
+                    if (entity is not None and isinstance(entity, Builder) and entity.id < self.Builder.id
+                            and entity.target == self.Builder.target):
+                        print("Builder id " + str(self.Builder.id) + " starts assisting.")
+                        self.Builder.target = None
+                        self.Builder.is_assistant = True
+                        self.Builder.assistant_of = entity.id
+                        self.Builder.destination = (copy.deepcopy(entity.target["location"]) * 32
+                                                    + Vector2(32, 32))
+                        return
             if (self.Builder.world.wood >= self.Builder.target["class"].COST_WOOD and
                     self.Builder.world.stone >= self.Builder.target["class"].COST_STONE):
                 if DEBUG:
@@ -211,7 +244,8 @@ class Waiting(State):
         if self.Builder.location.get_distance_to(self.Builder.destination) < 2:
             self.Builder.location = self.Builder.destination
 
-        if len(self.Builder.world.building_list) >= 1 and self.Builder.working_building is None:
+        if (len(self.Builder.world.building_list) >= 1 and self.Builder.working_building is None
+                and not self.Builder.is_assistant):
             print("Builder ID: " + str(self.Builder.id) + " noticed " + str(len(self.Builder.world.building_list))
                   + " incoming building request(s).")
             return "Finding"
@@ -219,6 +253,10 @@ class Waiting(State):
         elif self.Builder.working_building is not None:
             self.Builder.destination = self.Builder.working_building.location * 32 + Vector2(32, 32)
             return "Building"
+
+        elif (self.Builder.is_assistant
+              and self.Builder.world.entities[self.Builder.assistant_of].working_building is None):
+            pass
 
         if self.Builder.food < self.Builder.hunger_limit:
             return "Feeding"

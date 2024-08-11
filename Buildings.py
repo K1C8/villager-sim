@@ -51,6 +51,7 @@ class LumberYard(Building):
 
         self.image = self.image_funcs.get_irregular_image(2, 2, 2, 2)
         self.unfinished_image = self.image_funcs.get_irregular_image(2, 2, 0, 2)
+        self.finish_image = self.image_funcs.get_irregular_image(2, 2, 2, 2)
         self.image.set_colorkey((255, 0, 255))
         self.finish_image.set_colorkey((255, 0, 255))
         self.unfinished_image.set_colorkey((255, 0, 255))

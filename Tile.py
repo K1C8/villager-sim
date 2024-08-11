@@ -59,7 +59,7 @@ class SmoothStoneTile(Tile):
         Tile.__init__(self, world, tile_name)
         self.walkable = True
         self.buildable = True
-        self.cost = 2
+        self.cost = 3
 
 class CobblestoneTile(Tile):
     def __init__(self, world, tile_name):

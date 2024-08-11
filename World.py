@@ -96,6 +96,7 @@ class World(object):
 
         # List for builders.
         self.building_list = []
+        self.unfinished_buildings = []
 
         self.fields_waiting_to_sow = []
         self.fields_waiting_to_water = []
@@ -315,7 +316,7 @@ class World(object):
                 print("Checking block w_block: " + str(w_block) + ", h_block: " + str(h_block) + ", surrounding " +
                       "arable tiles count is: " + str(surround_arable_tiles) + ", water tiles count is " +
                       str(surround_water_tiles))
-                if surround_arable_tiles > 160 and surround_water_tiles > 10:
+                if surround_arable_tiles > 160 and surround_water_tiles > 16:
                     best_starting_blocks.append(starting_block)
         print(best_starting_blocks)
         if len(best_starting_blocks) > 0:
@@ -514,30 +515,33 @@ class World(object):
             dice = random()
             next_class = GameEntity
             image_string = "Angler"
-            if dice < 0.3:
-                next_class, image_string = (Angler.Angler, "Angler")
-            elif dice < 0.55:
-                next_class, image_string = (Farmer.Farmer, "Farmer")
-            elif dice < 0.72:
-                next_class, image_string = (Explorer.Explorer, "Explorer")
-            elif dice < 0.8:
-                next_class, image_string = (Arborist.Arborist, "Arborist")
-            elif dice < 0.93:
-                next_class, image_string = (Lumberjack.Lumberjack, "Lumberjack")
-            elif dice < 1:
-                next_class, image_string = (Builder.Builder, "Builder")
-            # farmer = Farmer.Farmer(self, "Farmer")
-            # farmer.location = copy.deepcopy(self.village_location)
-            # farmer.brain.set_state(farmer.primary_state)
-            new_entity = next_class(self, image_string)
-            new_entity.location = copy.deepcopy(self.rest_places[0])
-            new_entity.brain.set_state(new_entity.primary_state)
+            if self.living_entities_count > self.MAXpopulation:
+                dice = 2
+            if dice < 1:
+                if dice < 0.35:
+                    next_class, image_string = (Angler.Angler, "Angler")
+                elif dice < 0.53:
+                    next_class, image_string = (Farmer.Farmer, "Farmer")
+                elif dice < 0.67:
+                    next_class, image_string = (Explorer.Explorer, "Explorer")
+                elif dice < 0.78:
+                    next_class, image_string = (Arborist.Arborist, "Arborist")
+                elif dice < 0.90:
+                    next_class, image_string = (Lumberjack.Lumberjack, "Lumberjack")
+                else:
+                    next_class, image_string = (Builder.Builder, "Builder")
+                # farmer = Farmer.Farmer(self, "Farmer")
+                # farmer.location = copy.deepcopy(self.village_location)
+                # farmer.brain.set_state(farmer.primary_state)
+                new_entity = next_class(self, image_string)
+                new_entity.location = copy.deepcopy(self.rest_places[0])
+                new_entity.brain.set_state(new_entity.primary_state)
 
-            self.add_entity(new_entity)
-            self.crop -= 100
-            self.fish -= 100
-            # print("Farmer created")
-            print(image_string + " created")
+                self.add_entity(new_entity)
+                self.crop -= 100
+                self.fish -= 100
+                # print("Farmer created")
+                print(image_string + " created")
 
         is_builder_available = False
 
@@ -552,8 +556,8 @@ class World(object):
                 self.building_list.append(next_building)
 
         if DEBUG and len(self.building_list) > 0:
-            print("Building list length: " + str(len(self.building_list)))
-
+            # print("Building list length: " + str(len(self.building_list)))
+            pass
         for building in self.buildings.values():
             if building is not None:
                 building.update()
