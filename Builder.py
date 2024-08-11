@@ -73,6 +73,9 @@ class Builder_Building(State):
     def check_conditions(self):
         self.Builder.update()
 
+        if self.Builder.location.get_distance_to(self.Builder.destination) < 2:
+            self.Builder.location = self.Builder.destination
+
         if self.Builder.working_building.time_to_build <= 0:
             self.Builder.world.building_list.pop(0)
             for y in range(self.Builder.working_building.SIZE_Y):
@@ -166,6 +169,8 @@ class Builder_Finding(State):  # Finding a suitable place to build.
                           + ", requires stone: " + str(self.Builder.target["class"].COST_STONE)
                           + ". The village has wood: " + str(self.Builder.world.wood)
                           + ", stone: " + str(self.Builder.world.stone) + ".")
+                self.Builder.world.wood -= self.Builder.target["class"].COST_WOOD
+                self.Builder.world.stone -= self.Builder.target["class"].COST_STONE
                 self.Builder.destination = copy.deepcopy(self.Builder.target["location"]) * 32 + Vector2(32, 32)
                 self.Builder.building_class = self.Builder.target["class"]
 
@@ -183,7 +188,7 @@ class Builder_Finding(State):  # Finding a suitable place to build.
                         self.Builder.world.world_surface.blit(new_bldg_tile.img, new_bldg_tile.location)
 
             else:
-                self.Builder.world.building_list.put(self.Builder.target)
+                self.Builder.world.building_list.append(self.Builder.target)
                 self.Builder.target = None
 
         except IndexError:

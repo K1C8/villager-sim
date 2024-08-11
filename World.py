@@ -1,5 +1,7 @@
 import copy
 import queue
+from random import random
+
 import pygame
 
 import Buildings
@@ -473,6 +475,7 @@ class World(object):
             if building.supports > 0:
                 self.rest_places.append(building.location * self.tile_size +
                                         vector2.Vector2(self.tile_size, self.tile_size))
+        self.graph = create_graph(self)
 
     def process(self, delta):
         """Runs through each entity and runs their process function.
@@ -508,14 +511,31 @@ class World(object):
         # print("Number of entities: ", len(self.entities))
         if ((self.crop + self.fish) / len(self.entities)) >= 100 and (self.crop >= 100) and (self.fish >= 100):
             # Currenltly hardcoding farmer creation
-            farmer = Farmer.Farmer(self, "Farmer")
-            farmer.location = copy.deepcopy(self.village_location)
-            farmer.brain.set_state(farmer.primary_state)
+            dice = random()
+            next_class = GameEntity
+            image_string = "Angler"
+            if dice < 0.3:
+                next_class, image_string = (Angler.Angler, "Angler")
+            elif dice < 0.55:
+                next_class, image_string = (Farmer.Farmer, "Farmer")
+            elif dice < 0.72:
+                next_class, image_string = (Explorer.Explorer, "Explorer")
+            elif dice < 0.8:
+                next_class, image_string = (Arborist.Arborist, "Arborist")
+            elif dice < 0.93:
+                next_class, image_string = (Lumberjack.Lumberjack, "Lumberjack")
+            elif dice < 1:
+                next_class, image_string = (Builder.Builder, "Builder")
+            # farmer = Farmer.Farmer(self, "Farmer")
+            # farmer.location = copy.deepcopy(self.village_location)
+            # farmer.brain.set_state(farmer.primary_state)
+            new_entity = next_class(self, image_string)
 
-            self.add_entity(farmer)
+            self.add_entity(new_entity)
             self.crop -= 100
             self.fish -= 100
-            print("Farmer created")
+            # print("Farmer created")
+            print(image_string + " created")
 
         is_builder_available = False
 

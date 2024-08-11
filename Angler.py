@@ -37,7 +37,7 @@ class Angler(GameEntity):
         self.max_speed = 80.0 * (1.0 / 60.0)
         self.speed = self.max_speed
         self.base_speed = self.speed
-        self.view_range = 2
+        self.view_range = 3
         self.fish = 0
         self.hunger_limit = 40
 
@@ -70,7 +70,7 @@ class Fishing(State):
 
     def check_conditions(self):
 
-        if self.angler.location.get_distance_to(self.angler.destination) <= self.angler.max_speed:
+        if self.angler.location.get_distance_to(self.angler.destination) <= 0.25 * self.angler.world.tile_size:
             self.angler.destination = Vector2(self.angler.location)
             self.angler.update()
 
@@ -111,7 +111,7 @@ class Searching(State):
         pass
 
     def check_conditions(self):
-        if self.angler.location.get_distance_to(self.angler.destination) < self.angler.max_speed:
+        if self.angler.location.get_distance_to(self.angler.destination) < 0.25 * self.angler.world.tile_size:
             location_array = TileFuncs.get_vnn_array(self.angler.world,(self.angler.location), self.angler.view_range)
 
             for location in location_array:

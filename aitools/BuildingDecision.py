@@ -35,6 +35,11 @@ def building_decision(world):
                 return None
             location = world.get_next_building_pos(grid, size_x, size_y)
             if location is not None:
+                for waiting_bldg in world.building_list:
+                    if waiting_bldg["location"].get_distance_to(location) < 1:
+                        location = None
+                        break
+            if location is not None:
                 is_location_get = True
                 next_building["location"] = location
                 return next_building
