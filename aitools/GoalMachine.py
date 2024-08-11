@@ -183,6 +183,7 @@ class Action(object):
         """Overwritable"""
         pass
 
+
 if __name__ == "__main__":
     gm = GoalMachine()
     
