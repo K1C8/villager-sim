@@ -21,7 +21,7 @@ def random_dest(entity, recurse=False, r_num=0, r_max=6):
     possible_dest = Vector2(entity.location.x + math.cos(angle) * distance,
                             entity.location.y + math.sin(angle) * distance)
 
-    max_distance = entity.speed * FPS * 0.9 * 0.5 * DAY_DURATION
+    max_distance = entity.speed * FPS * 0.75 * 0.5 * DAY_DURATION
     nearest_food_court = entity.world.get_food_court(entity)
     if nearest_food_court is not None:
         home_distance = possible_dest.get_distance_to(nearest_food_court)
