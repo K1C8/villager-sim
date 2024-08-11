@@ -530,6 +530,8 @@ class World(object):
             # farmer.location = copy.deepcopy(self.village_location)
             # farmer.brain.set_state(farmer.primary_state)
             new_entity = next_class(self, image_string)
+            new_entity.location = copy.deepcopy(self.rest_places[0])
+            new_entity.brain.set_state(new_entity.primary_state)
 
             self.add_entity(new_entity)
             self.crop -= 100
@@ -631,20 +633,50 @@ class World(object):
         #     return self.fish_market[0]
 
     def get_barn(self, entity):
+        barn_candidates = []
         if len(self.barn) > 0:
-            return self.barn[0]
+            for b in self.barn:
+                barn_candidates.append((b, b.get_distance_to(entity.location)))
+        barn_candidates = sorted(barn_candidates, key=lambda fm: fm[1])
+        if len(barn_candidates) > 0:
+            return barn_candidates[0][0]
 
     def get_stonework(self, entity):
+        stone_candidates = []
         if len(self.stonework) > 0:
-            return self.stonework[0]
+            for sw in self.stonework:
+                stone_candidates.append((sw, sw.get_distance_to(entity.location)))
+        stone_candidates = sorted(stone_candidates, key=lambda fm: fm[1])
+        if len(stone_candidates) > 0:
+            return stone_candidates[0][0]
 
     def get_lumber_yard(self, entity):
+        ly_candidates = []
         if len(self.lumber_yard) > 0:
-            return self.lumber_yard[0]
+            for ly in self.lumber_yard:
+                ly_candidates.append((ly, ly.get_distance_to(entity.location)))
+        ly_candidates = sorted(ly_candidates, key=lambda fm: fm[1])
+        if len(ly_candidates) > 0:
+            return ly_candidates[0][0]
 
     def get_fish_market(self, entity):
+        fm_candidates = []
         if len(self.fish_market) > 0:
-            return self.fish_market[0]
+            for fm in self.fish_market:
+                fm_candidates.append((fm, fm.get_distance_to(entity.location)))
+        fm_candidates = sorted(fm_candidates, key=lambda fm: fm[1])
+        if len(fm_candidates) > 0:
+            return fm_candidates[0][0]
+
+    def get_rest_place(self, entity):
+        rest_candidates = []
+        if len(self.rest_places) > 0:
+            for rest in self.rest_places:
+                rest_candidates.append((rest, rest.get_distance_to(entity.location)))
+        rest_candidates = sorted(rest_candidates, key=lambda r: r[1])
+        if len(rest_candidates) > 0:
+            return rest_candidates[0][0]
+
 
     def get_next_building_pos(self, grid_upperleft_tile: vector2.Vector2, size_x, size_y):
         upperleft_x = int(grid_upperleft_tile.x)

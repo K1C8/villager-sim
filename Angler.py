@@ -123,7 +123,12 @@ class Searching(State):
                         destination_tile = TileFuncs.get_tile(self.angler.world, destination)
                         if destination_tile.walkable:
                             self.angler.destination = destination.copy()
-                            self.angler.world.known_fishing_spots.append(self.angler.destination)
+                            self.angler.destination.x = int(self.angler.destination.x // 32 * 32)
+                            self.angler.destination.y = int(self.angler.destination.y // 32 * 32)
+                            if self.angler.destination not in self.angler.world.known_fishing_spots:
+                                print("Angler ID: " + str(self.angler.id) + " adding new fishing spots: "
+                                      + str(self.angler.destination))
+                                self.angler.world.known_fishing_spots.append(self.angler.destination)
                             return "Fishing"
 
             BaseFunctions.random_dest(self.angler)

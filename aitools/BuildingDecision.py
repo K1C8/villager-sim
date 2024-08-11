@@ -18,7 +18,7 @@ def building_decision(world):
     elif float(world.fish) / float(world.MAXFish) >= UTILIZE_LIMIT:
         next_building = {"class": Buildings.FishMarket, "location": None}
 
-    if next_building is not None:
+    if next_building is not None and len(world.building_list) < world.builder_count:
         if DEBUG:
             print("New building decision triggered.")
         size_x = next_building["class"].SIZE_X

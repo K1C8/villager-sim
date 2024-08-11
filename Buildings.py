@@ -210,7 +210,7 @@ class Barn(Building):
         # self.cost_stone = 100
         # self.cost_wood = 50
 
-        self.world.MAXWood += self.HeldMax
+        self.world.MAXCrop += self.HeldMax
         self.can_drop_crop = True
 
 
@@ -260,5 +260,5 @@ class FishMarket(Building):
         # self.cost_wood = 150
         # self.cost_stone = 50
 
-        self.world.MAXStone += self.HeldMax
+        self.world.MAXFish += self.HeldMax
         self.can_drop_fish = True

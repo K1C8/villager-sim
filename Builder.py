@@ -188,7 +188,8 @@ class Builder_Finding(State):  # Finding a suitable place to build.
                         self.Builder.world.world_surface.blit(new_bldg_tile.img, new_bldg_tile.location)
 
             else:
-                self.Builder.world.building_list.append(self.Builder.target)
+                # Building request that does not have enough resources should be given up.
+                # self.Builder.world.building_list.append(self.Builder.target)
                 self.Builder.target = None
 
         except IndexError:
