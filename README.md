@@ -46,7 +46,6 @@ You can find the write-up details about the project here (You need to login with
 
 AI Components
 -------
-# Features Developed
 
 ## Environmental State Update
 
@@ -61,6 +60,8 @@ AI Components
 - **Villager behavior**:
   - During daytime: Villagers perform their jobs.
   - During nighttime: Villagers return to the town center or manors (depending on distance) to rest.
+
+![alt text](image-2.png)
 
 ### Starting Point Finding Rule Update (`World.py`, `find_starting_point(self)`)
 - **World generation**: Program allocates a starting point for the village by identifying grids of size 8x8 tiles.
@@ -136,7 +137,9 @@ AI Components
 - **Resource delivery**:
   - Villagers deliver resources to the nearest available building.
 
-## 2.3 Path Finding and Visualization
+![alt text](image-1.png)
+
+## Path Finding and Visualization
 
 ### Pathfinding Logic (`PathFinding.py`)
 - **Algorithm**: A* pathfinding algorithm is used instead of direct pathfinding.
