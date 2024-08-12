@@ -1,9 +1,15 @@
+"""
+CS5150 Game AI Final Project
+Team Member: Jianyan Chen, Ruidi Huang, Xin Qi
+Aug 2024
+
+This program defines class for the world in game.
+"""
+
 import copy
 import queue
 from random import random
-
 import pygame
-
 import Buildings
 from GameEntity import GameEntity
 from aitools.BuildingDecision import building_decision
@@ -132,25 +138,8 @@ class World(object):
 
         map_width, map_height = array_size
         map_generator = VoronoiMapGen.mapGen()
-
-        # midpoint_generator = MidpointDisplacement.MidpointDisplacement()
-        # mid_map = PertTools.scale_array(midpoint_generator.normalize(midpoint_generator.NewMidDis(int(math.log(map_width, 2)))), 255)
-        # vor_map = map_generator.whole_new_updated(size=array_size, ppr=2, c1=-1, c2=1, c3=0)
-
-        # combined_map = PertTools.combine_arrays(vor_map, mid_map, 0.33, 0.66)
-
-        # pert_map = PertTools.scale_array(midpoint_generator.normalize(midpoint_generator.NewMidDis(int(math.log(map_width, 2)))), 255)
-        # vor_map = map_generator.radial_drop(PertTools.pertubate(combined_map, pert_map), 1.5, 0.0)
-        # vor_map = map_generator.radial_drop(mid_map, 1.5, 0.0)
-
         vor_map = map_generator.radial_drop(map_generator.negative(map_generator.reallyCoolFull(array_size, num_p=23)),
                                             max_scalar=1.5, min_scalar=0.0)
-
-        # All grass map for testing
-        # vor_map = [[150 for x in range(128)] for y in range(128) ]
-
-        # Method without radial drop
-        # vor_map = map_generator.negative(map_generator.reallyCoolFull(array_size, num_p=23))
 
         self.minimap_img = pygame.Surface((map_width, map_height))
         self.tile_array = [[0 for tile_x in range(map_width)] for tile_y in range(map_height)]
@@ -240,6 +229,11 @@ class World(object):
                 self.tile_array[tile_y][tile_x] = new_tile
 
     def find_starting_point(self):
+        """Find a suitable starting point for the village.
+
+        Returns:
+            Vector2: The tile position of the starting point.
+        """
         # Calculate 8x8 block count in width
         w_block_count = int(self.w / 32 // 8)
         # Calculate 8x8 block count in height
@@ -376,13 +370,6 @@ class World(object):
                                           }
                            }
 
-        # for key in start.keys():
-        #     for count in range(start[key]["count"]):
-        #         new_ent = start[key]["class"](self, key)
-        #         new_ent.location = copy.deepcopy(self.village_location)
-        #         new_ent.brain.set_state(start[key]["state"])
-        #         self.add_entity(new_ent)
-
         for key in start_buildings.keys():
             for count in range(start_buildings[key]["count"]):
                 # new_building initial function call
@@ -394,15 +381,6 @@ class World(object):
                     location = copy.deepcopy(new_bldg_pos)
                     new_bldg = start_buildings[key]["class"](self, location, key)
                     self.add_building(new_bldg)
-                    # if key == "TownCenter":
-                    #     new_bldg = start_buildings[key]["class"](self, location, key)
-                    #     self.add_building(new_bldg)
-                    # # temporary codes
-                    # elif key == "LumberYard":
-                    #
-                    # elif key == "Barn":
-                    #
-                    # elif key == "StoneStorage":
 
         for key in start.keys():
             for count in range(start[key]["count"]):
@@ -441,6 +419,14 @@ class World(object):
             self.builder_count += 1
 
     def add_building(self, building):
+        """Add a building to the world.
+
+        Args:
+            building (Building): The building to add.
+
+        Returns:
+            None
+        """
         self.buildings[self.building_id] = building
         building.id = self.building_id
         self.building_id += 1
@@ -619,6 +605,14 @@ class World(object):
             self.world_position.y = y_temp_1 + (y_temp_2 / 2)
 
     def get_food_court(self, entity: GameEntity):
+        """Get the nearest food court for the given entity.
+
+        Args:
+            entity (GameEntity): The entity seeking food.
+
+        Returns:
+            Vector2: The location of the nearest food court.
+        """
         food_court_candidates = []
         if len(self.barn) == 0 and len(self.fish_market) == 0:
             return None
@@ -631,12 +625,16 @@ class World(object):
         food_court_candidates = sorted(food_court_candidates, key=lambda fc: fc[1])
         if len(food_court_candidates) > 0:
             return food_court_candidates[0][0]
-        # if len(self.barn) > 0:
-        #     return self.barn[0]
-        # elif len(self.fish_market) > 0:
-        #     return self.fish_market[0]
 
     def get_barn(self, entity):
+        """Get the nearest barn for the given entity.
+
+        Args:
+            entity (GameEntity): The entity seeking a barn.
+
+        Returns:
+            Vector2: The location of the nearest barn.
+        """
         barn_candidates = []
         if len(self.barn) > 0:
             for b in self.barn:
@@ -646,6 +644,14 @@ class World(object):
             return barn_candidates[0][0]
 
     def get_stonework(self, entity):
+        """Get the nearest stonework for the given entity.
+
+        Args:
+            entity (GameEntity): The entity seeking stonework.
+
+        Returns:
+            Vector2: The location of the nearest stonework.
+        """
         stone_candidates = []
         if len(self.stonework) > 0:
             for sw in self.stonework:
@@ -655,6 +661,14 @@ class World(object):
             return stone_candidates[0][0]
 
     def get_lumber_yard(self, entity):
+        """Get the nearest lumber yard for the given entity.
+
+        Args:
+            entity (GameEntity): The entity seeking a lumber yard.
+
+        Returns:
+            Vector2: The location of the nearest lumber yard.
+        """
         ly_candidates = []
         if len(self.lumber_yard) > 0:
             for ly in self.lumber_yard:
@@ -664,6 +678,14 @@ class World(object):
             return ly_candidates[0][0]
 
     def get_fish_market(self, entity):
+        """Get the nearest fish market for the given entity.
+
+        Args:
+            entity (GameEntity): The entity seeking a fish market.
+
+        Returns:
+            Vector2: The location of the nearest fish market.
+        """
         fm_candidates = []
         if len(self.fish_market) > 0:
             for fm in self.fish_market:
@@ -673,6 +695,14 @@ class World(object):
             return fm_candidates[0][0]
 
     def get_rest_place(self, entity):
+        """Get the nearest rest place for the given entity.
+
+        Args:
+            entity (GameEntity): The entity seeking rest.
+
+        Returns:
+            Vector2: The location of the nearest rest place.
+        """
         rest_candidates = []
         if len(self.rest_places) > 0:
             for rest in self.rest_places:
@@ -683,6 +713,16 @@ class World(object):
 
 
     def get_next_building_pos(self, grid_upperleft_tile: vector2.Vector2, size_x, size_y):
+        """Find the next available building position in the grid.
+
+        Args:
+            grid_upperleft_tile (Vector2): The upper-left tile of the grid.
+            size_x (int): The width of the building in tiles.
+            size_y (int): The height of the building in tiles.
+
+        Returns:
+            Vector2: The location of the next available building position.
+        """
         upperleft_x = int(grid_upperleft_tile.x)
         upperleft_y = int(grid_upperleft_tile.y)
         for y in range(0, 8):

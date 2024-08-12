@@ -1,3 +1,13 @@
+"""
+CS5150 Game AI Final Project
+Team Member: Jianyan Chen, Ruidi Huang, Xin Qi
+Aug 2024
+
+This program contains classes related to Lumberjack.
+The Lumberjack class represents a villager whose primary task is to search for trees, chop them down,
+and deliver the wood to a lumberyard.
+"""
+
 from aitools.StateMachine import *
 from Entities import *
 from GameEntity import *
@@ -20,8 +30,18 @@ NoTreeImg = pygame.image.load("Images/Tiles/MinecraftGrass.png")
 
 
 class Lumberjack(GameEntity):
-
+    """
+    The Lumberjack class represents a villager whose primary task is to search for trees, chop them down,
+    and deliver the wood to a lumberyard.
+    """
     def __init__(self, world, image_string):
+        """
+        Initializes a Lumberjack object with basic attributes such as position, speed, and states.
+
+        Args:
+            world (World): The game world the Lumberjack exists in.
+            image_string (str): The path to the Lumberjack's image file.
+        """
         # Initializing the class
         GameEntity.__init__(self, world, "Lumberjack", "Entities/"+image_string,
                             consume_func=consume_func_villager)
@@ -58,6 +78,9 @@ class Lumberjack(GameEntity):
         self.update()
 
     def update(self):
+        """
+        Updates the Lumberjack's animation frame and handles the chopping action.
+        """
         # Updates image every 10 cycles and adds 1 to the 4 hit dig
         self.image = self.sprites[self.animation.get_frame()]
         self.image.set_colorkey((255,0,255))
@@ -80,12 +103,19 @@ class Searching(State):
         self.lumberjack = Lumberjack
 
     def entry_actions(self):
+        """
+        Actions performed when the Lumberjack enters the Searching state, such as setting a random destination.
+        """
         BaseFunctions.random_dest(self.lumberjack)
 
     def do_actions(self):
         pass
 
     def check_conditions(self):
+        """
+        Checks conditions to transition to other states. If a tree is found, transitions to the Chopping state.
+        If the Lumberjack is hungry, transitions to the Feeding state. If the workday ends, transitions to the Idle state.
+        """
         if self.lumberjack.location.get_distance_to(self.lumberjack.destination) < 15:
             location_array = TileFuncs.get_vnn_array(self.lumberjack.world,(self.lumberjack.location), self.lumberjack.view_range)
 
@@ -110,6 +140,9 @@ class Searching(State):
 
 
 class Chopping(State):
+    """
+    The Chopping state handles the Lumberjack's behavior when chopping down a tree.
+    """
     def __init__(self, Lumberjack):
         State.__init__(self, "Chopping")
         self.lumberjack = Lumberjack
@@ -121,6 +154,9 @@ class Chopping(State):
         pass
 
     def check_conditions(self):
+        """
+        Checks conditions to transition to other states. If the tree is fully chopped, transitions to the Delivering state.
+        """
         check = TileFuncs.get_tile(self.lumberjack.world,Vector2(self.lumberjack.location))
         if self.lumberjack.location.get_distance_to(self.lumberjack.destination) < 15:
             self.lumberjack.destination = Vector2(self.lumberjack.location)
@@ -175,6 +211,9 @@ class Delivering(State):
         self.lumberjack = Lumberjack
 
     def entry_actions(self):
+        """
+        Actions performed when the Lumberjack enters the Delivering state, such as setting the destination to the lumberyard.
+        """
         # self.lumberjack.destination = Vector2(self.lumberjack.world.w/2,self.lumberjack.world.h/2)
         self.lumberjack.destination = self.lumberjack.world.lumber_yard[0]
 
@@ -182,31 +221,12 @@ class Delivering(State):
         pass
 
     def check_conditions(self):
-
-        # if self.lumberjack.world.wood >= self.lumberjack.world.MAXwood:
-        #    return "Idle"
-
+        """
+        Checks conditions to transition to other states. If the wood is successfully delivered, transitions to the Feeding state.
+        """
         if self.lumberjack.location.get_distance_to(self.lumberjack.destination) < 15:
             self.lumberjack.world.wood += 5
             return "Feeding"
 
     def exit_actions(self):
         pass
-
-
-# class Idle(State):
-#     def __init__(self, Lumberjack):
-#         State.__init__(self, "Idle")
-#         self.lumberjack = Lumberjack
-#
-#     def entry_actions(self):
-#         pass
-#
-#     def do_actions(self):
-#         pass
-#
-#     def check_conditions(self):
-#         pass
-#
-#     def exit_actions(self):
-#         pass

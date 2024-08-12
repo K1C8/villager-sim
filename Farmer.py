@@ -1,3 +1,14 @@
+"""
+CS5150 Game AI Final Project
+Team Member: Jianyan Chen, Ruidi Huang, Xin Qi
+Aug 2024
+
+This program contains classes related to farmer.
+The Farmer class represents a villager responsible for managing farming tasks such as tilling,
+sowing, watering, harvesting, and delivering crops. It transitions between various states to 
+perform these tasks.
+"""
+
 """This class is going to be tasked with planting and harvesting crops. This
    class used to plant trees, however this has been moved to Arborist (which
    is the name of someone who takes care of trees you pleb)."""
@@ -21,10 +32,17 @@ import BaseFunctions
 
 
 class Farmer(GameEntity):
-    """The main class for Farmer. See above for the description"""
+    """The Farmer class represents a villager responsible for managing farming tasks such as tilling,
+    sowing, watering, harvesting, and delivering crops. It transitions between various states to 
+    perform these tasks."""
 
     def __init__(self, world, image_string):
-        """Basic initialization"""
+        """Initializes the Farmer object with its attributes and states.
+
+        Args:
+            world (World): The game world instance.
+            image_string (str): The string to load the Farmer's image.
+        """
 
         # Initializing the class
         GameEntity.__init__(self, world, "Farmer", "Entities/" + image_string, consume_func=consume_func_villager)
@@ -78,6 +96,7 @@ class Farmer(GameEntity):
         self.update()
 
     def update(self):
+        """Updates the Farmer's image and animation status."""
         # Updates image every 10 cycles and adds 1 to the hit count; tilling and harvesting require 4 hits;
         # sowing and watering require 8 hits
         self.image = self.sprites[self.animation.get_frame()]
@@ -94,10 +113,16 @@ class FarmerTilling(aitools.StateMachine.State):
     """
 
     def __init__(self, farmer: Farmer):
+        """Initializes the FarmerTilling state.
+
+        Args:
+            farmer (Farmer): The Farmer object in this state.
+        """
         aitools.StateMachine.State.__init__(self, "Tilling")
         self.farmer = farmer
 
     def entry_actions(self):
+        """Actions taken when the Farmer enters the Tilling state."""
         # BaseFunctions.random_dest(self.farmer)
         pass
 
@@ -105,6 +130,11 @@ class FarmerTilling(aitools.StateMachine.State):
         pass
 
     def check_conditions(self):
+        """Checks whether conditions are met to transition out of the Tilling state.
+
+        Returns:
+            str: The name of the next state to transition to, if any.
+        """
         # If there is no more room to add another tile to farm, return to searching
         if self.farmer.world.farmer_count * TILES_PER_FARMER <= len(self.farmer.world.fields):
             return self.farmer.primary_state  # "Searching"
@@ -191,16 +221,27 @@ class FarmerSearching(aitools.StateMachine.State):
     """
 
     def __init__(self, farmer: Farmer):
+        """Initializes the FarmerSearching state.
+
+        Args:
+            farmer (Farmer): The Farmer object in this state.
+        """
         aitools.StateMachine.State.__init__(self, "Searching")
         self.farmer = farmer
 
     def entry_actions(self):
+        """Actions taken when the Farmer enters the Searching state."""
         BaseFunctions.random_dest(self.farmer)
 
     def do_actions(self):
         pass
 
     def check_conditions(self):
+        """Checks whether conditions are met to transition out of the Searching state.
+
+        Returns:
+            str: The name of the next state to transition to, if any.
+        """
 
         if (len(self.farmer.harvest_list) > 0 or
                 (self.farmer.world.harvest_queue is not None and not self.farmer.world.harvest_queue.empty())):
@@ -277,8 +318,13 @@ class FarmerSearching(aitools.StateMachine.State):
 
 
 class FarmerSowing(aitools.StateMachine.State):
-
+    """This state manages the Farmer's sowing actions."""
     def __init__(self, farmer: Farmer):
+        """Initializes the FarmerSowing state.
+
+        Args:
+            farmer (Farmer): The Farmer object in this state.
+        """
         aitools.StateMachine.State.__init__(self, "Sowing")
         self.farmer = farmer
 
@@ -290,6 +336,11 @@ class FarmerSowing(aitools.StateMachine.State):
         pass
 
     def check_conditions(self):
+        """Checks whether conditions are met to transition out of the Sowing state.
+
+        Returns:
+            str: The name of the next state to transition to, if any.
+        """
         check = TileFuncs.get_tile(self.farmer.world, Vector2(self.farmer.location))
         if (self.farmer.location.get_distance_to(self.farmer.destination) < (0.10 * self.farmer.world.tile_size)
                 and check.crop_plantable):
@@ -348,8 +399,14 @@ class FarmerSowing(aitools.StateMachine.State):
 
 
 class FarmerWatering(aitools.StateMachine.State):
+    """This state manages the Farmer's watering actions."""
 
     def __init__(self, farmer: Farmer):
+        """Initializes the FarmerWatering state.
+
+        Args:
+            farmer (Farmer): The Farmer object in this state.
+        """
         aitools.StateMachine.State.__init__(self, "Watering")
         self.farmer = farmer
 
@@ -361,6 +418,11 @@ class FarmerWatering(aitools.StateMachine.State):
         pass
 
     def check_conditions(self):
+        """Checks whether conditions are met to transition out of the Watering state.
+
+        Returns:
+            str: The name of the next state to transition to, if any.
+        """
         check = TileFuncs.get_tile(self.farmer.world, Vector2(self.farmer.location))
         if (self.farmer.location.get_distance_to(self.farmer.destination) < (0.10 * self.farmer.world.tile_size)
                 and check.crop_waterable):
@@ -420,8 +482,13 @@ class FarmerWatering(aitools.StateMachine.State):
 
 
 class FarmerHarvesting(aitools.StateMachine.State):
-
+    """This state manages the Farmer's harvesting actions."""
     def __init__(self, farmer: Farmer):
+        """Initializes the FarmerHarvesting state.
+
+        Args:
+            farmer (Farmer): The Farmer object in this state.
+        """
         aitools.StateMachine.State.__init__(self, "Harvesting")
         self.farmer = farmer
 
@@ -433,6 +500,11 @@ class FarmerHarvesting(aitools.StateMachine.State):
         pass
 
     def check_conditions(self):
+        """Checks whether conditions are met to transition out of the Harvesting state.
+
+        Returns:
+            str: The name of the next state to transition to, if any.
+        """
         check = TileFuncs.get_tile(self.farmer.world, Vector2(self.farmer.location))
         if TileFuncs.is_entity_collided(self.farmer.world, self.farmer):
             print("Farmer id " + str(self.farmer.id) + " deteced colliding on tile.")
@@ -500,18 +572,29 @@ class FarmerHarvesting(aitools.StateMachine.State):
 
 
 class Delivering(State):
-
+    """This state manages the Farmer's delivering actions, where the Farmer takes harvested crops to the barn."""
     def __init__(self, farmer):
+        """Initializes the Delivering state.
+
+        Args:
+            farmer (Farmer): The Farmer object in this state.
+        """
         State.__init__(self, "Delivering")
         self.farmer = farmer
 
     def entry_actions(self):
+        """Actions taken when the Farmer enters the Delivering state."""
         self.farmer.destination = self.farmer.world.get_barn(self.farmer)
 
     def do_actions(self):
         pass
 
     def check_conditions(self):
+        """Checks whether conditions are met to transition out of the Delivering state.
+
+        Returns:
+            str: The name of the next state to transition to, if any.
+        """
         if self.farmer.location.get_distance_to(self.farmer.destination) < 15:
             self.farmer.world.crop += self.farmer.crop
             self.farmer.crop = 0

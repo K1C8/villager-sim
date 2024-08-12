@@ -1,3 +1,12 @@
+"""
+CS5150 Game AI Final Project
+Team Member: Jianyan Chen, Ruidi Huang, Xin Qi
+Aug 2024
+
+This program defines the Angler class for villagers in the game.
+Angler performs fishting tasks in the game.
+"""
+
 from aitools.StateMachine import *
 from Entities import *
 from GameEntity import *
@@ -11,12 +20,21 @@ import BaseFunctions
 import TileFuncs
 from World import *
 from async_funcs.entity_consumption import consume_func_villager
-#TODO: Clean up imports and add docstrings
 
 
 class Angler(GameEntity):
-
+    """
+    Angler is a specialized GameEntity that performs fishing tasks in the game.
+    The Angler has states such as Fishing, Searching, Delivering, Feeding, and Idle.
+    """
     def __init__(self, world, image_string):
+        """
+        Initializes an Angler entity in the game world.
+
+        Args:
+            world (World): The game world in which the Angler exists.
+            image_string (str): The path to the image representing the Angler.
+        """
         # Initializing the class
         GameEntity.__init__(self, world, "Angler", "Entities/"+image_string, consume_func_villager)
 
@@ -54,6 +72,7 @@ class Angler(GameEntity):
         self.update()
 
     def update(self):
+        """Updates the Angler's current image based on the animation state."""
         self.image = self.sprites[self.animation.get_frame()]
         self.image.set_colorkey((255,0,255))
         if self.animation.finished:
@@ -62,22 +81,37 @@ class Angler(GameEntity):
 
 
 class Fishing(State):
-
+    """
+    Fishing is a state where the Angler fishes at a designated location until it has caught enough fish.
+    """
     def __init__(self, angler):
+        """
+        Initializes the Fishing state.
 
+        Args:
+            angler (Angler): The Angler entity associated with this state.
+        """
         State.__init__(self, "Fishing")
         self.angler = angler
 
     def check_conditions(self):
+        """
+        Checks if the conditions to continue fishing or transition to another state are met.
 
+        Returns:
+            str: The next state to transition to, if any.
+        """
+        # Check if Angler has reached its destination
         if self.angler.location.get_distance_to(self.angler.destination) <= 0.25 * self.angler.world.tile_size:
             self.angler.destination = Vector2(self.angler.location)
             self.angler.update()
 
+        # Transition to Delivering state if enough fish are caught
         if self.angler.fish >= 1:
             return "Delivering"
 
     def do_actions(self):
+        """Performs actions associated with fishing."""
         if self.angler.location == self.angler.destination and self.angler.hit >= 4:
             # TODO: Why is this checking if the tile is fishable if it has been fishing there?
             
@@ -89,16 +123,26 @@ class Fishing(State):
             self.angler.hit = 0
 
     def entry_actions(self):
+        """Defines actions to be taken when entering the Fishing state."""
         BaseFunctions.random_dest(self.angler)
 
 
 class Searching(State):
-
+    """
+    Searching is a state where the Angler searches for a suitable fishing spot.
+    """
     def __init__(self, angler):
+        """
+        Initializes the Searching state.
+
+        Args:
+            angler (Angler): The Angler entity associated with this state.
+        """
         State.__init__(self, "Searching")
         self.angler = angler
 
     def entry_actions(self):
+        """Defines actions to be taken when entering the Searching state."""
         dice = random()
         if dice > ANGLER_RETURN_PROBABILITY or len(self.angler.world.known_fishing_spots) == 0:
             BaseFunctions.random_dest(self.angler)
@@ -111,6 +155,13 @@ class Searching(State):
         pass
 
     def check_conditions(self):
+        """
+        Checks if the conditions to continue searching or transition to another state are met.
+
+        Returns:
+            str: The next state to transition to, if any.
+        """
+        # Check if the Angler has reached its destination
         if self.angler.location.get_distance_to(self.angler.destination) < 0.25 * self.angler.world.tile_size:
             location_array = TileFuncs.get_vnn_array(self.angler.world,(self.angler.location), self.angler.view_range)
 
@@ -133,6 +184,7 @@ class Searching(State):
 
             BaseFunctions.random_dest(self.angler)
 
+        # Check if Angler needs to eat
         if self.angler.food < self.angler.hunger_limit:
             return "Feeding"
         # Bro you have to work and get something before going home!
@@ -144,20 +196,34 @@ class Searching(State):
 
 
 class Delivering(State):
-
+    """
+    Delivering is a state where the Angler delivers the caught fish to a designated location.
+    """
     def __init__(self, angler):
+        """
+        Initializes the Delivering state.
+
+        Args:
+            angler (Angler): The Angler entity associated with this state.
+        """
         State.__init__(self, "Delivering")
         self.angler = angler
 
     def entry_actions(self):
-        # TODO: Make dropoff point dynamic (e.g. its own building)
-
+        """Defines actions to be taken when entering the Delivering state."""
         self.angler.destination = copy.deepcopy(self.angler.world.get_fish_market(self.angler))
 
     def do_actions(self):
         pass
 
     def check_conditions(self):
+        """
+        Checks if the conditions to continue delivering or transition to another state are met.
+
+        Returns:
+            str: The next state to transition to, if any.
+        """
+        # Check if Angler has reached the delivery point
         if self.angler.location.get_distance_to(self.angler.destination) < 15:
             self.angler.world.fish += self.angler.fish
             self.angler.fish = 0

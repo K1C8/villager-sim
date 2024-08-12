@@ -1,3 +1,12 @@
+"""
+CS5150 Game AI Final Project
+Team Member: Jianyan Chen, Ruidi Huang, Xin Qi
+Aug 2024
+
+This program defines the Arborist class for villagers in the game.
+Arborist plants trees in the game.
+"""
+
 from aitools.StateMachine import *
 from Entities import *
 from GameEntity import *
@@ -16,8 +25,18 @@ import BaseFunctions
 
 
 class Arborist(GameEntity):
-
+    """
+    Arborist is a specialized GameEntity responsible for planting trees in the game world.
+    The Arborist transitions between states such as Planting, Feeding, and Idle.
+    """
     def __init__(self, world, image_string):
+        """
+        Initializes an Arborist entity in the game world.
+
+        Args:
+            world (World): The game world in which the Arborist exists.
+            image_string (str): The path to the image representing the Arborist.
+        """
         # Initializing the class
         GameEntity.__init__(self, world, "Arborist", "Entities/"+image_string, consume_func_villager)
 
@@ -49,6 +68,10 @@ class Arborist(GameEntity):
         self.update()
 
     def update(self):
+        """
+        Updates the Arborist's current image based on the animation state
+        and increments the hit counter when the animation finishes.
+        """
         # Updates image every 10 cycles and adds 1 to the 4 hit dig
         self.image = self.sprites[self.animation.get_frame()]
         self.image.set_colorkey((255,0,255))
@@ -58,35 +81,57 @@ class Arborist(GameEntity):
 
 
 class Arborist_Planting(State):
-
+    """
+    Arborist_Planting is a state where the Arborist plants trees in the game world.
+    """
     def __init__(self, Arborist):
+        """
+        Initializes the Planting state.
 
+        Args:
+            Arborist (Arborist): The Arborist entity associated with this state.
+        """
         State.__init__(self, "Planting")
         self.arborist = Arborist
 
     def check_conditions(self):
+        """
+        Checks if the conditions to continue planting or transition to another state are met.
 
+        Returns:
+            str: The next state to transition to, if any.
+        """
+        # Check if Arborist has reached its destination
         if self.arborist.location.get_distance_to(self.arborist.destination) < 15:
             self.arborist.destination = Vector2(self.arborist.location)
             self.arborist.update()
 
+        # Transition to Feeding state if Arborist is hungry
         if self.arborist.food < self.arborist.hunger_limit:
             return "Feeding"
 
+        # Transition to Idle state if the workday is over
         if self.arborist.world.time >= WORKING_TIME_END:
             return "Idle"
 
     def do_actions(self):
-
+        """
+        Performs actions associated with planting trees.
+        """
+        # Plant a seed if Arborist is at the destination and the tile is plantable
         if self.arborist.location == self.arborist.destination and self.arborist.hit >= 4 and TileFuncs.get_tile(
                 self.arborist.world,self.arborist.location).plantable == 1:
             self.plant_seed()
 
+        # Move to a random destination if the current tile is not plantable
         if self.arborist.location == self.arborist.destination and self.arborist.hit != 4 and TileFuncs.get_tile(
                 self.arborist.world, self.arborist.location).plantable != 1:
             BaseFunctions.random_dest(self.arborist)
 
     def plant_seed(self):
+        """
+        Plants a tree on the current tile if it is plantable.
+        """
         # Function for planting trees
 
         # Test to see if the tile the arborist is on is a tile that a tree can be planted on
@@ -95,6 +140,7 @@ class Arborist_Planting(State):
             self.arborist.update()
             old_tile = TileFuncs.get_tile(self.arborist.world,Vector2(self.arborist.location))
 
+            # Prepare the new tile for the tree
             darkness = pygame.Surface((32, 32))
             darkness.set_alpha(old_tile.darkness)
 
@@ -106,6 +152,7 @@ class Arborist_Planting(State):
             new_tile.rect.topleft = new_tile.location
             new_tile.color = old_tile.color
 
+            # Update the world with the new tile
             self.arborist.world.tile_array[int(new_tile.location.y/32)][int(new_tile.location.x/32)] = new_tile
             self.arborist.world.world_surface.blit(new_tile.img, new_tile.location)
             self.arborist.world.world_surface.blit(darkness, new_tile.location)
@@ -115,4 +162,7 @@ class Arborist_Planting(State):
         BaseFunctions.random_dest(self.arborist)
 
     def entry_actions(self):
+        """
+        Defines actions to be taken when entering the Planting state.
+        """
         BaseFunctions.random_dest(self.arborist)

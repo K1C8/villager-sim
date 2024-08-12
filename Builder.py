@@ -1,3 +1,12 @@
+"""
+CS5150 Game AI Final Project
+Team Member: Jianyan Chen, Ruidi Huang, Xin Qi
+Aug 2024
+
+This program contains classes related to builder.
+Builders construct buildings.
+"""
+
 import Buildings
 import Tile
 from aitools.StateMachine import *
@@ -17,7 +26,18 @@ import pygame
 
 
 class Builder(GameEntity):
+    """
+    The Builder class represents a builder entity in the game responsible for constructing buildings.
+    It handles the logic for finding building sites, constructing buildings, and returning to idle or waiting states.
+    """
     def __init__(self, world, image):
+        """
+        Initialize the Builder entity with its attributes and states.
+
+        Args:
+            world (World): The game world in which the builder exists.
+            image (str): The image file name associated with the builder entity.
+        """
         GameEntity.__init__(self, world=world, name="Builder", image_string="Entities/" + image,
                             consume_func=consume_func_villager)
 
@@ -31,6 +51,7 @@ class Builder(GameEntity):
         # Building speed of Builders
         # self.tp = 0.05
 
+        # Initializing states for the builder's state machine
         self.building_state = Builder_Building(self)
         self.idle_state = Idle(self)
         self.Finding_state = Builder_Finding(self)
@@ -68,16 +89,33 @@ class Builder(GameEntity):
 
 
 class Builder_Building(State):
+    """
+    The state where the builder is actively constructing a building.
+    """
     def __init__(self, Builder):
+        """
+        Initialize the Builder_Building state.
+
+        Args:
+            Builder (Builder): The builder entity associated with this state.
+        """
         State.__init__(self, "Building")
         self.Builder = Builder
 
     def check_conditions(self):
+        """
+        Checks whether the builder has completed the construction or needs to switch to another state.
+
+        Returns:
+            str: The name of the next state, if any, otherwise None.
+        """
         self.Builder.update()
 
+        # Check if the builder has reached its destination
         if self.Builder.location.get_distance_to(self.Builder.destination) < 2:
             self.Builder.location = self.Builder.destination
 
+        # If assisting another builder, stop assisting if the work is done
         if self.Builder.is_assistant:
             if (self.Builder.world.entities[self.Builder.assistant_of].working_building is None or
                     self.Builder.world.entities[self.Builder.assistant_of].working_building.time_to_build <= 0):
@@ -87,6 +125,7 @@ class Builder_Building(State):
                 self.Builder.destination = self.Builder.wait_location
                 return self.Builder.primary_state
 
+        # If the building is complete, remove it from the building list
         if not self.Builder.is_assistant and self.Builder.working_building.time_to_build <= 0:
             self.Builder.world.building_list.pop(0)
             for y in range(self.Builder.working_building.SIZE_Y):
@@ -102,6 +141,7 @@ class Builder_Building(State):
                     self.Builder.world.tile_array[int(new_bldg_tile_y)][int(new_bldg_tile_x)] = new_bldg_tile
                     self.Builder.world.world_surface.blit(new_bldg_tile.img, new_bldg_tile.location)
 
+            # Mark the building as complete
             self.Builder.working_building.image = self.Builder.working_building.finish_image
             self.Builder.working_building.unfinished_image = None
             self.Builder.working_building = None
@@ -110,18 +150,25 @@ class Builder_Building(State):
             # self.Builder.world.BuildingQueue.remove(self.Builder.target)
             return self.Builder.primary_state
 
+        # Switch to feeding or idle state if necessary
         if self.Builder.food < self.Builder.hunger_limit:
             return "Feeding"
         if self.Builder.world.time >= WORKING_TIME_END:
             return "Idle"
 
     def do_actions(self):
+        """
+        Perform actions related to the building process, like reducing the time to build.
+        """
         if not self.Builder.is_assistant:
             self.Builder.working_building.time_to_build -= self.Builder.tp
         elif self.Builder.world.entities[self.Builder.assistant_of].working_building is not None:
             self.Builder.world.entities[self.Builder.assistant_of].working_building.time_to_build -= self.Builder.tp
 
     def entry_actions(self):
+        """
+        Actions to perform when entering the building state, like initializing a new building.
+        """
         # self.Builder.destination = self.Builder.location.copy()
         # self.building_complete = 0.0
         if self.Builder.working_building is None and not self.Builder.is_assistant:
@@ -142,6 +189,9 @@ class Builder_Building(State):
             self.Builder.working_building = new_bldg
 
     def exit_actions(self):
+        """
+        Actions to perform when exiting the building state, like resetting the builder's destination.
+        """
         self.Builder.destination = self.Builder.wait_location
         # if self.Builder.is_assistant:
         #     print("Builder id " + str(self.Builder.id) + " stops assisting.")
@@ -151,7 +201,9 @@ class Builder_Building(State):
 
 
 class Builder_Finding(State):  # Finding a suitable place to build.
-    """If:
+    """
+    The state where the builder is looking for a suitable place to build.
+    If:
     Lumberyard - In the woods not near anything else
     Docks - Edge of the water, decently distanced from others
     House - Somewhere in the town area
@@ -159,10 +211,22 @@ class Builder_Finding(State):  # Finding a suitable place to build.
     """
 
     def __init__(self, Builder):
+        """
+        Initialize the Builder_Finding state.
+
+        Args:
+            Builder (Builder): The builder entity associated with this state.
+        """
         State.__init__(self, "Finding")
         self.Builder = Builder
 
     def check_conditions(self):
+        """
+        Checks whether the builder has found a target or needs to switch to another state.
+
+        Returns:
+            str: The name of the next state, if any, otherwise None.
+        """
         if self.Builder.target is None and not self.Builder.is_assistant:
             return "Waiting"
 
@@ -179,6 +243,9 @@ class Builder_Finding(State):  # Finding a suitable place to build.
         pass
 
     def entry_actions(self):
+        """
+        Actions to perform when entering the finding state, such as determining the next building target.
+        """
         try:
             self.Builder.target = None
             self.Builder.target = self.Builder.world.building_list[0]
@@ -230,17 +297,35 @@ class Builder_Finding(State):  # Finding a suitable place to build.
 
 
 class Waiting(State):
+    """
+    The state where the builder waits for the next task or for resources to become available.
+    """
     def __init__(self, Builder):
+        """
+        Initialize the Waiting state.
+
+        Args:
+            Builder (Builder): The builder entity associated with this state.
+        """
         State.__init__(self, "Waiting")
         self.Builder = Builder
 
     def entry_actions(self):
+        """
+        Actions to perform when entering the waiting state, such as setting the wait location.
+        """
         if DEBUG:
             print("Builder ID: " + str(self.Builder.id) + " entering waiting state.")
         self.Builder.destination = self.Builder.wait_location
         pass
 
     def check_conditions(self):
+        """
+        Checks whether the builder should exit the waiting state and start building.
+
+        Returns:
+            str: The name of the next state, if any, otherwise None.
+        """
         if self.Builder.location.get_distance_to(self.Builder.destination) < 2:
             self.Builder.location = self.Builder.destination
 
@@ -262,3 +347,4 @@ class Waiting(State):
             return "Feeding"
         if self.Builder.world.time >= WORKING_TIME_END:
             return "Idle"
+
