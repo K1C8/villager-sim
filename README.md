@@ -10,8 +10,11 @@ Start
 
 To run this you must Install PyGame - http://www.pygame.org/download.shtml
 
+```pip install pygame```
+
 We used networkx library in path finding logic, make sure you have it installed before start the game -  https://networkx.org/documentation/stable/install.html
-pip install networkx[default]
+
+```pip install networkx[default]```
 
 Start with ```python UpdatingVillagerSim.py```
 
@@ -30,6 +33,7 @@ Note, you cannot just select ```hard shadow``` without the other two, nor ```wor
 You can find the project presentation slides here: https://docs.google.com/presentation/d/147pPRkHVVH6SKW51kCM0nFAqyFPZcu8u1g8Lua2uYO4/edit?usp=sharing
 
 You can find the write-up details about the project here (You need to login with your NEU Email): https://northeastern-my.sharepoint.com/:w:/g/personal/qi_xin2_northeastern_edu/EcNOcY2pp9dIgpau50mDq8gBuOWP37Ikowl3oQcAnJ4vKA?e=KiV3Qx
+
 Licence
 -------
 
