@@ -1,9 +1,13 @@
 Villager-Sim
 ============
+This is a CS5150 Final Project based on an open-source GitHub repository: https://github.com/najarvis/villager-sim
 
-A project we have been working on for a while. The end goal is to create a
-civilization that can grow and explore on it's own though artificial intelligence
-by setting goals for itself, learning what it needs to do to accomplish those goals.
+Villager Sim is a virtual village where AI villagers live. Its final goal is to create a civilization that can grow and explore on its own through AI by setting goals and states.
+
+![alt text](image.png)
+
+August, Summer 2024
+Group Members: Jianyan Chen, Ruidi Huang, Xin Qi
 
 Start
 -----
