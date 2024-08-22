@@ -1,9 +1,12 @@
-"""The explorer is a villager driven to the find the amazing by thier
-unwaivering curiosity for what is unknown. These will seek new land
-and features to help advance the civilization, though may at times
-pursure knowledge at other costs.
+"""
+CS5150 Game AI Final Project
+Team Member: Jianyan Chen, Ruidi Huang, Xin Qi
+Aug 2024
 
-Also this class was primarily developed to track down movement bugs."""
+This program defines the Explorer class for villagers in the game.
+Explorers find stone in the world and takes them back home.
+"""
+
 
 import random
 import aitools.StateMachine
@@ -18,10 +21,17 @@ import Tile
 import TileFuncs
 
 class Explorer(GameEntity.GameEntity):
-    """See file doctring for the description."""
+    """The Explorer class is responsible for searching and collecting resources (specifically stone)
+    within the game world, while managing its state transitions between different actions like exploring, 
+    collecting, and feeding."""
  
     def __init__(self, world, image_string):
-        """Basic initialization for the class."""
+        """Initializes the Explorer object with its attributes and states.
+
+        Args:
+            world (World): The game world instance.
+            image_string (str): The string to load the Explorer's image.
+        """
 
         GameEntity.GameEntity.__init__(self, world, "Explorer", "Entities/"+image_string,
                                        consume_func=consume_func_villager)
@@ -57,7 +67,13 @@ class Explorer(GameEntity.GameEntity):
         self.unload_speed = 1
 
 class SearchStone(aitools.StateMachine.State):
+    """State where the Explorer searches for stone resources within the game world."""
     def __init__(self, this_explorer):
+        """Initializes the SearchStone state.
+
+        Args:
+            this_explorer (Explorer): The Explorer object in this state.
+        """
         aitools.StateMachine.State.__init__(self, "SearchStone")
         self.explorer = this_explorer
         
@@ -67,26 +83,34 @@ class SearchStone(aitools.StateMachine.State):
         
 
     def do_actions(self):
+        """Actions performed by the Explorer while in the SearchStone state."""
         curr_tile = self.explorer.world.tile_array[self.explorer.tile_location_y][self.explorer.tile_location_x] 
         if self.explorer.location == self.explorer.destination:
             BaseFunctions.random_dest(self.explorer)      
         pass
     
     def check_conditions(self):
-        """Check if the explorer should still be exploring stone"""
+        """Checks whether conditions are met to transition out of the SearchStone state.
+
+        Returns:
+            str: The name of the next state to transition to, if any.
+        """
         
         curr_tile = self.explorer.world.tile_array[self.explorer.tile_location_y][self.explorer.tile_location_x] 
 
+        # Transition to CollectStone if a stone tile is found
         if isinstance(curr_tile, Tile.SmoothStoneTile) \
         or isinstance(curr_tile, Tile.CobblestoneTile): 
             return "CollectStone" 
         
         curr_tile = self.explorer.world.tile_array[self.explorer.tile_location_y][self.explorer.tile_location_x]
 
+        # Continue moving to a new destination
         if self.explorer.location.get_distance_to(self.explorer.destination) < (0.5 * self.explorer.world.tile_size):
             # if self.explorer.location == self.explorer.destination:
             BaseFunctions.random_dest(self.explorer)
 
+        # Check for transitions to Feeding or Idle states
         if self.explorer.food < self.explorer.hunger_limit:
             return "Feeding"
         if self.explorer.world.time >= WORKING_TIME_END:
@@ -98,81 +122,98 @@ class SearchStone(aitools.StateMachine.State):
         pass
        
 class CollectStone(aitools.StateMachine.State):
-    """The primary function of the explorer, to search for places previously
-    unvisited or unfound. Eventually the explorer should keep track of
-    and prioritize places it hasn't visited."""
+    """State where the Explorer collects stone resources from a stone tile."""
 
     def __init__(self, this_explorer):
+        """Initializes the CollectStone state.
+
+        Args:
+            this_explorer (Explorer): The Explorer object in this state.
+        """
         aitools.StateMachine.State.__init__(self, "CollectStone")
         self.explorer = this_explorer
 
     def entry_actions(self):
-        """When the explorer starts exploring (enters exploring state)."""
+        """When the explorer starts collecting stone (enters collecting stone state)."""
         # BaseFunctions.random_dest(self.explorer)
         pass
 
     def do_actions(self):
-        """What should the explorer do while it is exploring"""
+        """What should the explorer do while it is collecting stone"""
         if self.explorer.stone < self.explorer.MAX_STONE:
             self.explorer.stone += self.explorer.collect_speed
 
     def check_conditions(self):
-        """Check if the explorer should still be exploring"""
+        """Check if the explorer should still be collecting stone"""
         if self.explorer.stone >= self.explorer.MAX_STONE:
             return "Return"
 
     def exit_actions(self):
-        """What the explorer does as it stops exploring"""
+        """What the explorer does as it stops collecting stone"""
         self.explorer.destination = self.explorer.world.get_stonework(self.explorer) 
         
 class Return(aitools.StateMachine.State):
-    """The primary function of the explorer, to search for places previously
-    unvisited or unfound. Eventually the explorer should keep track of
-    and prioritize places it hasn't visited."""
+    """State where the Explorer returns to the base or drop-off point after collecting stone."""
 
     def __init__(self, this_explorer):
+        """Initializes the Return state.
+
+        Args:
+            this_explorer (Explorer): The Explorer object in this state.
+        """
         aitools.StateMachine.State.__init__(self, "Return")
         self.explorer = this_explorer
 
     def entry_actions(self):
-        """When the explorer starts exploring (enters exploring state)."""
+        """Actions taken when the Explorer enters the Return state."""
         pass
     
     def do_actions(self):
-        """What should the explorer do while it is exploring"""
+        """Actions performed by the Explorer while returning to the base."""
         pass
 
     def check_conditions(self):
-        """Check if the explorer should still be exploring"""
+        """Checks whether conditions are met to transition out of the Return state.
+
+        Returns:
+            str: The name of the next state to transition to, if any.
+        """
         curr_tile = TileFuncs.get_tile(self.explorer.world, self.explorer.location)
         dest_tile = TileFuncs.get_tile(self.explorer.world, self.explorer.destination)
         if curr_tile == dest_tile:
             return "UnloadStone"
         
     def exit_actions(self):
-        """What the explorer does as it stops exploring"""
+        """Actions taken when the Explorer exits the Return state."""
         pass
     
 class UnloadStone(aitools.StateMachine.State):
-    """The primary function of the explorer, to search for places previously
-    unvisited or unfound. Eventually the explorer should keep track of
-    and prioritize places it hasn't visited."""
+    """State where the Explorer unloads the collected stone at the base or drop-off point."""
 
     def __init__(self, this_explorer):
+        """Initializes the UnloadStone state.
+
+        Args:
+            this_explorer (Explorer): The Explorer object in this state.
+        """
         aitools.StateMachine.State.__init__(self, "UnloadStone")
         self.explorer = this_explorer
 
     def entry_actions(self):
-        """When the explorer starts exploring (enters exploring state)."""
+        """Actions taken when the Explorer enters the UnloadStone state."""
 
     def do_actions(self):
-        """What should the explorer do while it is exploring"""
+        """Actions performed by the Explorer while unloading stone."""
         if self.explorer.stone > 0:
             self.explorer.stone -= self.explorer.unload_speed
             self.explorer.world.stone += self.explorer.unload_speed
 
     def check_conditions(self):
-        """Check if the explorer should still be exploring"""
+        """Checks whether conditions are met to transition out of the UnloadStone state.
+
+        Returns:
+            str: The name of the next state to transition to, if any.
+        """
         if self.explorer.hunger_limit > self.explorer.food:
             return "Feeding"
         
@@ -180,16 +221,19 @@ class UnloadStone(aitools.StateMachine.State):
             return "SearchStone"
         
     def exit_actions(self):
-        """What the explorer does as it stops exploring"""
+        """Actions taken when the Explorer exits the UnloadStone state."""
         BaseFunctions.random_dest(self.explorer)
         pass
     
 class Exploring(aitools.StateMachine.State):
-    """The primary function of the explorer, to search for places previously
-    unvisited or unfound. Eventually the explorer should keep track of
-    and prioritize places it hasn't visited."""
+    """State where the Explorer searches for new areas or resources."""
 
     def __init__(self, this_explorer):
+        """Initializes the Exploring state.
+
+        Args:
+            this_explorer (Explorer): The Explorer object in this state.
+        """
         aitools.StateMachine.State.__init__(self, "Exploring")
         self.explorer = this_explorer
 
@@ -202,7 +246,11 @@ class Exploring(aitools.StateMachine.State):
         pass
 
     def check_conditions(self):
-        """Check if the explorer should still be exploring"""
+        """Checks whether conditions are met to transition out of the Exploring state.
+
+        Returns:
+            str: The name of the next state to transition to, if any.
+        """
         if self.explorer.location.get_distance_to(self.explorer.destination) <= self.explorer.speed:
             BaseFunctions.random_dest(self.explorer)
 

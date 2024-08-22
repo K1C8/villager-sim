@@ -1,3 +1,11 @@
+"""
+CS5150 Game AI Final Project
+Team Member: Jianyan Chen, Ruidi Huang, Xin Qi
+Aug 2024
+This is an original file from the repo.
+We did not make any change to it in final project.
+"""
+
 import GameEntity
 import aitools.StateMachine as StateMachine
 import math, random

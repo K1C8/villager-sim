@@ -1,3 +1,10 @@
+"""
+CS5150 Game AI Final Project
+Team Member: Jianyan Chen, Ruidi Huang, Xin Qi
+Aug 2024
+
+This program contains functions related to Tiles.
+"""
 from gametools import vector2
 import Tile
 import math
@@ -5,6 +12,16 @@ from gametools.vector2 import Vector2
 
 
 def get_tile(world, location):
+    """
+    Retrieves the tile at the given location in the world.
+
+    Args:
+        world: The game world instance containing the tiles.
+        location (Vector2): The location to retrieve the tile from.
+
+    Returns:
+        Tile: The tile at the specified location or a default "Sand" tile if out of bounds.
+    """
     tile = get_tile_pos(world, location)
     try:
         return world.tile_array[int(tile.y)][int(tile.x)]
@@ -12,6 +29,16 @@ def get_tile(world, location):
         return Tile.Tile(world, "Sand")
 
 def get_tile_neighbours(world, location):
+    """
+    Retrieves the neighboring tiles around a given location in the world.
+
+    Args:
+        world: The game world instance containing the tiles.
+        location (Vector2): The location to find neighbors for.
+
+    Returns:
+        list: A list of neighboring locations (as Vector2 objects).
+    """
     directions = [
         Vector2(1, 0),  # East
         Vector2(-1, 0), # West
@@ -31,9 +58,30 @@ def get_tile_neighbours(world, location):
     return neighbors
 
 def get_tile_pos(world, location):
+    """
+    Converts a location in the world to a tile grid position.
+
+    Args:
+        world: The game world instance containing the tiles.
+        location (Vector2): The location to convert.
+
+    Returns:
+        Vector2: The tile position corresponding to the given location.
+    """
     return vector2.Vector2(int(location.x) >> 5, int(location.y) >> 5)
 
 def get_entity(world,location, radius = 20):
+    """
+    Retrieves an entity within a specified radius of a location in the world.
+
+    Args:
+        world: The game world instance containing the entities.
+        location (Vector2): The location to search around.
+        radius (int, optional): The radius to search within. Defaults to 20.
+
+    Returns:
+        tuple: The entity found within the radius, or None if no entity is found.
+    """
     for i in world.entities.items():
         ent_location = i[1].world_location
         if ((ent_location.x - location.x)**2 + (ent_location.y - location.y)**2) < radius**2:
@@ -41,6 +89,17 @@ def get_entity(world,location, radius = 20):
     # print "no ents"
 
 def get_tile_array(world, start_pos, dimensions):
+    """
+    Retrieves a 2D array of tiles starting from a given position.
+
+    Args:
+        world: The game world instance containing the tiles.
+        start_pos (Vector2): The starting position to retrieve tiles.
+        dimensions (tuple): The dimensions (width, height) of the tile array.
+
+    Returns:
+        list: A 2D array of tiles.
+    """
     dimensions = (int(dimensions[0]), int(dimensions[1]))
 
     start_tile = get_tile_pos(world,start_pos)
@@ -62,6 +121,17 @@ def get_tile_array(world, start_pos, dimensions):
     return array
 
 def get_vnn_array(world, location, r):
+    """
+    Returns the Von Neumann neighborhood of a location based on a specified range.
+
+    Args:
+        world: The game world instance containing the tiles.
+        location (Vector2): The location to get the neighborhood for.
+        r (int): The range of the neighborhood.
+
+    Returns:
+        list: A list of locations (as Vector2 objects) in the Von Neumann neighborhood.
+    """
     """ Stands for Von Neumann Neighborhood.
         Simply returns a neighborhood of locations based
         on the initial location and range r"""
@@ -109,6 +179,16 @@ def get_vnn_array(world, location, r):
 
 
 def is_entity_collided(world, entity):
+    """
+    Checks if the given entity has collided with any other entities in the world.
+
+    Args:
+        world: The game world instance containing the entities.
+        entity: The entity to check for collisions.
+
+    Returns:
+        bool: True if a collision is detected, False otherwise.
+    """
     for i in world.entities.items():
         if i[1] is not None and i[1].id != entity.id:
             i_tile_location = vector2.Vector2(i[1].tile_location_x, i[1].tile_location_y)

@@ -1,3 +1,10 @@
+"""
+CS5150 Game AI Final Project
+Team Member: Jianyan Chen, Ruidi Huang, Xin Qi
+Aug 2024
+
+This program contains all configuration constants for villagers.
+"""
 
 FEEDING_THRESHOLD = 75
 

@@ -1,4 +1,11 @@
 #! python3
+"""
+CS5150 Game AI Final Project
+Team Member: Jianyan Chen, Ruidi Huang, Xin Qi
+Aug 2024
+
+This is an UNUSED file from the original repo.
+"""
 
 __author__ = 'Nick Jarvis'
 

@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
+"""
+CS5150 Game AI Final Project
+Team Member: Jianyan Chen, Ruidi Huang, Xin Qi
+Aug 2024
+This is an UNUSED file from the original repo. The old version of controller.
+"""
 
 """VillagerSim, a project aimed at creating an artificial intelligence, capable of exploring an island"""
 

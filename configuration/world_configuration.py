@@ -1,3 +1,11 @@
+"""
+CS5150 Game AI Final Project
+Team Member: Jianyan Chen, Ruidi Huang, Xin Qi
+Aug 2024
+
+This program contains all configuration constants for the world.
+"""
+
 # Configuration of day and night
 DAYTIME_DURATION = 38.0
 NIGHTTIME_DURATION = 22.0
