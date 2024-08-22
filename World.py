@@ -335,7 +335,7 @@ class World(object):
         Returns:
             None"""
 
-        start = {"Lumberjack": {"count": 2,
+        start = {"Lumberjack": {"count": 1,
                                 "state": "Searching",
                                 "class": Lumberjack.Lumberjack},
 
@@ -354,7 +354,7 @@ class World(object):
                  "Explorer": {"count": 1,
                               "state": "SearchStone",
                               "class": Explorer.Explorer},
-                 "Builder": {"count": 1,
+                 "Builder": {"count": 2,
                              "state": "Waiting",
                              "class": Builder.Builder}
                  }
@@ -687,7 +687,8 @@ class World(object):
         upperleft_y = int(grid_upperleft_tile.y)
         for y in range(0, 8):
             for x in range(0, 8):
-                if y % size_y == 0 and x % size_x == 0:
+                if (y % size_y == 0 and x % size_x == 0 and upperleft_y + y + 1 < self.h // 32
+                        and upperleft_x + y + 1 < self.w // 32):
                     lot_tiles = [self.tile_array[upperleft_y + y][upperleft_x + x],
                                  self.tile_array[upperleft_y + y + 1][upperleft_x + x],
                                  self.tile_array[upperleft_y + y][upperleft_x + x + 1],

@@ -143,10 +143,10 @@ class Builder_Building(State):
 
     def exit_actions(self):
         self.Builder.destination = self.Builder.wait_location
-        # if self.Builder.is_assistant:
-        #     print("Builder id " + str(self.Builder.id) + " stops assisting.")
-        #     self.Builder.is_assistant = False
-        #     self.Builder.assistant_of = None
+        if self.Builder.is_assistant:
+            print("Builder id " + str(self.Builder.id) + " stops assisting.")
+            self.Builder.is_assistant = False
+            self.Builder.assistant_of = None
 
 
 
@@ -186,7 +186,7 @@ class Builder_Finding(State):  # Finding a suitable place to build.
                 return
             if self.Builder.world.builder_count > 1:
                 for entity in self.Builder.world.entities.values():
-                    if (entity is not None and isinstance(entity, Builder) and entity.id < self.Builder.id
+                    if (entity is not None and isinstance(entity, Builder) and entity.id != self.Builder.id
                             and entity.target == self.Builder.target):
                         print("Builder id " + str(self.Builder.id) + " starts assisting.")
                         self.Builder.target = None
@@ -244,6 +244,11 @@ class Waiting(State):
         if self.Builder.location.get_distance_to(self.Builder.destination) < 2:
             self.Builder.location = self.Builder.destination
 
+        if self.Builder.food < self.Builder.hunger_limit:
+            return "Feeding"
+        if self.Builder.world.time >= WORKING_TIME_END:
+            return "Idle"
+
         if (len(self.Builder.world.building_list) >= 1 and self.Builder.working_building is None
                 and not self.Builder.is_assistant):
             print("Builder ID: " + str(self.Builder.id) + " noticed " + str(len(self.Builder.world.building_list))
@@ -258,7 +263,6 @@ class Waiting(State):
               and self.Builder.world.entities[self.Builder.assistant_of].working_building is None):
             pass
 
-        if self.Builder.food < self.Builder.hunger_limit:
-            return "Feeding"
-        if self.Builder.world.time >= WORKING_TIME_END:
-            return "Idle"
+    def exit_actions(self):
+        self.Builder.is_assistant = False
+        self.Builder.assistant_of = None

@@ -56,7 +56,7 @@ class LumberYard(Building):
         self.finish_image.set_colorkey((255, 0, 255))
         self.unfinished_image.set_colorkey((255, 0, 255))
         self.Held = 0
-        self.HeldMax = 50
+        self.HeldMax = 500
         self.cost = 100
         self.time_to_build = 4800
 
@@ -82,7 +82,7 @@ class Dock(Building):
         self.unfinished_image.set_colorkey((255, 0, 255))
 
         self.Held = 0
-        self.HeldMax = 25
+        self.HeldMax = 2500
         self.cost = 150
         self.time_to_build = 6000
         

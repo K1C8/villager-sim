@@ -46,7 +46,7 @@ class GameEntity(object):
 
         self.id = 0
 
-        self.tp = 1.0
+        self.tp = 2.0
         self.path = []
         self.next_node = None
 
